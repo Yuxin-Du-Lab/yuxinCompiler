@@ -1,0 +1,27 @@
+
+/**//*/*/
+
+/***
+ *
+ * @return
+ */
+
+ /** /
+  *
+  *
+  */
+
+  int main () {
+  /*//*//*PrintId*/ a+b
+  }
+
+int/*space*/main{}
+_();;{}printf("const and var // decl and def test\n");}
+const int array[2] = {1,2};
+
+int main(){
+    int c;
+    c = getint();
+    printf("output is %d",c);
+    return c;
+}
