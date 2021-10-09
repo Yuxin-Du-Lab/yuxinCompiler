@@ -1,94 +1,85 @@
-const int a = 1;
-const int b= 7 * 9, c = 0;
+const int a0 = 1;
+const int b0 = 2, c0 = 3;
+int a1 = 0, b1 = 0;
+int c1 = 0;
 
-int d = 8;
-int e, f = -7;
+const int s1[3] = {1,2,3};
+const int s2[2][2] = {{1,2}, {3,4}};
+int s3[3] = {1,2,3};
+int s4[2][2] = {{1,2}, {3,4}};
 
-const int g[3] = {29, -29, 0};
-const int h[3][2/1] = {{1, 2}, {3, 4}, {5*1, 2+(((2)))+1*2}};
-
-int i[300], j[2][1] = {{2}, {-9}};
-
-int i_t_e_r(int b) {
-    printf("@%d ", b);
-    if (b > 0) {
-        return b * i_t_e_r(b - 1) - 1;
-    } else {
-        return b - 1;
+int dealSet0(int s1[], int s2[][2]) {
+    int i = 0, sum = 0;
+    while (i<2) {
+        sum = sum + s1[i] + s2[i][0] + s2[i][1];
+        i = i + 1;
     }
-    return 0;
+    return sum;
 }
 
-int iter_pro(int b_) {
-    printf("*%d ", b_);
-    if (b_ < 0) {
-        return -1;
-    } else {
-        return iter_pro(b_ - 1) + i_t_e_r(b_);
-    }
-    return 0;
+int getnumber() {
+    int instantA,instantB,instantC;
+    instantA = 1 + a0 + (b0 + c0);
+    instantB = instantA * instantA / instantA % b0;
+    instantB = instantA - (instantB + c0);
+	if (b1<a1==a1<a1!=b1>b1!=a1>a1==b1<=b1==b1>=b1) {
+		instantC = 1;
+	}
+    printf("A = %d\n", instantA);
+    printf("B = %d\n", instantB);
+    printf("C = %d\n", instantC);
+    return 1;
 }
 
-void change(int k, int m[], int n[][1]) {
-    k = k - 1;
-    m[0] = m[0] - 1;
-    n[0][0] = n[0][0] - 1;
+int addself(int a) {
+    return a+a;
+}
+
+int multself(int a) {
+    return a*a;
+}
+
+void none(){
     return;
 }
 
-void m() {
-    ;
-    return;
+void minus(int a, int b) {
 }
 
 int main() {
-    int k, l = 9;
-    int m[9];
-    int n[2][1] = {{1}, {5}};
-    k = getint();
-    l = getint();
-    n[0][0] = getint();
-    printf("19231133\n");
-    printf("%d\n%d\n%d\n", i_t_e_r(k), i_t_e_r(l), i_t_e_r(i_t_e_r(0)));
-    printf("%d\n", iter_pro(iter_pro(iter_pro(n[0][0])) + 1));
-    printf("before: %d, %d, %d\n", l, i[0], n[0][0]);
-    change(l, i, n);
-    printf("after: %d, %d, %d\n", l, i[0], n[0][0]);
-    while (7 == 7) {
-        if (-8 >= -7) {
+    int value;
+    int i = 0, cycle;
+    ;
+    {}
+    printf("19231007\n");
+    printf("input recurrent cycle:\n");
+    cycle = getint();
+    printf("cycle is: %d\n", cycle);
+
+    printf("input initial value:\n");
+    value = getint();
+    printf("initial value is: %d\n", value);
+
+    if (!0) {
+        printf("your input is good\n");
+        while (i<cycle) {
+            value = addself(value);
+            value = multself(value);
+            i = i + 1;
             continue;
         }
-        printf("Con");
-        while (1-1+1*1) {
-            if (4 <= 3) {
-                continue;
-            }
-            printf("gra");
-            while (!0) {
-                if (-1 < -9) {
-                    continue;
-                }
-                printf("tul");
-                while ((((((1)))))) {
-                    if (0 > 0) {
-                        continue;
-                    }
-                    printf("ati");
-                    while (1) {
-                        if (0) {
-                            continue;
-                        } else {
-                            printf("on!\n");
-                        }
-                        break;
-                    }
-                    break;
-                }
-                break;
-            }
-            break;
+    }
+    else {
+        printf("your input is zero\n");
+        if (cycle == 0) {
         }
+    }
+
+    while(1){
+        value = value - getnumber() - dealSet0(s3, s4);
+        printf("final value is: %d\n", value);
         break;
     }
-    return 0;
+
+	return 0;
 }

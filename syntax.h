@@ -12,6 +12,10 @@
 
 void syntaxAnalysis(std::vector<Token> wordList);
 
+ConstExp *getConstExp(std::vector<Token> wordList, int *pointer);
+
+AddExp *getAddExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
+
 CompUnit *getCompUnit(std::vector<Token> wordList, int *pointer);
 
 MainFuncDef *getMainFuncDef(std::vector<Token> wordList, int *pointer);
@@ -40,7 +44,6 @@ EqExp *getEqExp(std::vector<Token> wordList, int *pointer);
 
 RelExp *getRelExp(std::vector<Token> wordList, int *pointer);
 
-AddExp *getAddExp(std::vector<Token> wordList, int *pointer);
 
 MulExp *getMulExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
@@ -51,8 +54,6 @@ PrimaryExp *getPrimaryExp(std::vector<Token> wordList, int *pointer, bool scanni
 Number *getNumber(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
 VarDef *getVarDef(std::vector<Token> wordList, int *pointer);
-
-ConstExp *getConstExp(std::vector<Token> wordList, int *pointer);
 
 InitVal *getInitVal(std::vector<Token> wordList, int *pointer);
 

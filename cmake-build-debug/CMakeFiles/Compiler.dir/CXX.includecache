@@ -10,26 +10,6 @@
 iostream
 /home/yuxin/CLionProjects/Compiler/iostream
 
-/home/yuxin/CLionProjects/Compiler/lexer.h
-iostream
--
-fstream
--
-vector
-/home/yuxin/CLionProjects/Compiler/vector
-cstring
--
-Token.h
-/home/yuxin/CLionProjects/Compiler/Token.h
-
-/home/yuxin/CLionProjects/Compiler/main.cpp
-lexer.h
-/home/yuxin/CLionProjects/Compiler/lexer.h
-vector
-/home/yuxin/CLionProjects/Compiler/vector
-syntax.h
-/home/yuxin/CLionProjects/Compiler/syntax.h
-
 /home/yuxin/CLionProjects/Compiler/syntax.cpp
 fstream
 -

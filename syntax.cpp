@@ -216,7 +216,7 @@ Stmt *getSmt(std::vector<Token> wordList, int *pointer) {
         if (wordList[scan].getIdentity() == LBRACK) {
 //            getExp
             scan++;
-            getExp(wordList, &scan);
+            getExp(wordList, &scan, true);
             if (wordList[scan].getIdentity() == RBRACK) {
                 scan++;
             }
@@ -224,7 +224,7 @@ Stmt *getSmt(std::vector<Token> wordList, int *pointer) {
         if (wordList[scan].getIdentity() == LBRACK) {
 //            getExp
             scan++;
-            getExp(wordList, &scan);
+            getExp(wordList, &scan, true);
             if (wordList[scan].getIdentity() == RBRACK) {
                 scan++;
             }
@@ -264,10 +264,18 @@ Stmt *getSmt(std::vector<Token> wordList, int *pointer) {
 //            is exp
 //            getExp
             getExp(wordList, pointer);
+            if (wordList[*pointer].getIdentity() == SEMICN) {
+                writeFile4syntax(wordList[*pointer]);
+                (*pointer)++;
+            }
         }
     } else {
 //        getExp
         getExp(wordList, pointer);
+        if (wordList[*pointer].getIdentity() == SEMICN) {
+            writeFile4syntax(wordList[*pointer]);
+            (*pointer)++;
+        }
     }
     writeFile4syntax("Stmt");
     return stmtptr;
