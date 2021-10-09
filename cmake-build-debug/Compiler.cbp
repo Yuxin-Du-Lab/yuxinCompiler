@@ -97,6 +97,18 @@
 		<Unit filename="/home/yuxin/CLionProjects/Compiler/main.cpp">
 			<Option target="Compiler"/>
 		</Unit>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntax.cpp">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntax.h">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntaxLib.cpp">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntaxLib.h">
+			<Option target="Compiler"/>
+		</Unit>
 		<Unit filename="/home/yuxin/CLionProjects/Compiler/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>

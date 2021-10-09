@@ -11,4 +11,15 @@ CMakeFiles/Compiler.dir/lexer.cpp.o: \
 CMakeFiles/Compiler.dir/main.cpp.o: \
  ../Token.h \
  ../lexer.h \
- ../main.cpp
+ ../main.cpp \
+ ../syntax.h \
+ ../syntaxLib.h
+CMakeFiles/Compiler.dir/syntax.cpp.o: \
+ ../Token.h \
+ ../syntax.cpp \
+ ../syntax.h \
+ ../syntaxLib.h
+CMakeFiles/Compiler.dir/syntaxLib.cpp.o: \
+ ../Token.h \
+ ../syntaxLib.cpp \
+ ../syntaxLib.h

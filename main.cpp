@@ -1,19 +1,22 @@
 #include "lexer.h"
 #include "vector"
+#include "syntax.h"
 
 void writeFile4WordList(std::vector<Token> wordList) {
-    std::ofstream writeFile("output.txt");
+    std::ofstream writeLexerFile("outputWordList.txt");
     auto scan = wordList.begin();
     while (scan != wordList.end()) {
-        writeFile << scan->toString() << std::endl;
+        writeLexerFile << scan->toString() << std::endl;
         scan ++;
     }
 }
 
 // main
 int main() {
-    std::vector<Token> wordList = worldsAnalyse();
-    writeFile4WordList(wordList);
+    std::ifstream readLexerFile("testfile.txt");
+//    std::ofstream writeLexerFile("output.txt");
+    std::vector<Token> wordList = worldsAnalyse(readLexerFile);
+//    writeFile4WordList(wordList);
+    syntaxAnalysis(wordList);
     return 0;
 }
-

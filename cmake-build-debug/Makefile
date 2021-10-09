@@ -201,6 +201,54 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+syntax.o: syntax.cpp.o
+.PHONY : syntax.o
+
+# target to build an object file
+syntax.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntax.cpp.o
+.PHONY : syntax.cpp.o
+
+syntax.i: syntax.cpp.i
+.PHONY : syntax.i
+
+# target to preprocess a source file
+syntax.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntax.cpp.i
+.PHONY : syntax.cpp.i
+
+syntax.s: syntax.cpp.s
+.PHONY : syntax.s
+
+# target to generate assembly for a file
+syntax.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntax.cpp.s
+.PHONY : syntax.cpp.s
+
+syntaxLib.o: syntaxLib.cpp.o
+.PHONY : syntaxLib.o
+
+# target to build an object file
+syntaxLib.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.o
+.PHONY : syntaxLib.cpp.o
+
+syntaxLib.i: syntaxLib.cpp.i
+.PHONY : syntaxLib.i
+
+# target to preprocess a source file
+syntaxLib.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.i
+.PHONY : syntaxLib.cpp.i
+
+syntaxLib.s: syntaxLib.cpp.s
+.PHONY : syntaxLib.s
+
+# target to generate assembly for a file
+syntaxLib.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.s
+.PHONY : syntaxLib.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -219,6 +267,12 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... syntax.o"
+	@echo "... syntax.i"
+	@echo "... syntax.s"
+	@echo "... syntaxLib.o"
+	@echo "... syntaxLib.i"
+	@echo "... syntaxLib.s"
 .PHONY : help
 
 

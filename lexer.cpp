@@ -5,10 +5,10 @@
 #include "lexer.h"
 #include "Token.h"
 
-std::vector<Token> worldsAnalyse () {
+std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
     char bufferLine[LINELENGTH];
     std::vector<Token> wordList;
-    std::ifstream fileRead("testfile.txt");
+//    std::ifstream fileRead("testfile.txt");
     if (fileRead.bad()) {
         return wordList;
     }

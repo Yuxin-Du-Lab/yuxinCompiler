@@ -12,3 +12,14 @@ CMakeFiles/Compiler.dir/main.cpp.o
  /home/yuxin/CLionProjects/Compiler/Token.h
  /home/yuxin/CLionProjects/Compiler/lexer.h
  /home/yuxin/CLionProjects/Compiler/main.cpp
+ /home/yuxin/CLionProjects/Compiler/syntax.h
+ /home/yuxin/CLionProjects/Compiler/syntaxLib.h
+CMakeFiles/Compiler.dir/syntax.cpp.o
+ /home/yuxin/CLionProjects/Compiler/Token.h
+ /home/yuxin/CLionProjects/Compiler/syntax.cpp
+ /home/yuxin/CLionProjects/Compiler/syntax.h
+ /home/yuxin/CLionProjects/Compiler/syntaxLib.h
+CMakeFiles/Compiler.dir/syntaxLib.cpp.o
+ /home/yuxin/CLionProjects/Compiler/Token.h
+ /home/yuxin/CLionProjects/Compiler/syntaxLib.cpp
+ /home/yuxin/CLionProjects/Compiler/syntaxLib.h

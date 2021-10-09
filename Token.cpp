@@ -18,6 +18,10 @@ std::string Token::toString() {
     return identity + " " + value;
 }
 
+std::string Token::getIdentity() {
+    return identity;
+}
+
 Token::~Token() {
 //    std::cout << "destroy" << std::endl;
 }

@@ -1,27 +1,39 @@
+int getNarcissisticNumber() {
+    int n = 100;
+    int cnt = 0;
+    const int top = 1000;
+    int i, j, k;
+    while (n < top) {
+        i = n / 100;
+        j = n / 10 - i * 10;
+        k = n % 10;
+        if (n == i * i * i + j * j * j + k * k * k) {
+            printf("NNumber: %d\n", n);
+            cnt = cnt + 1;
+        }
+        n = n + 1;
+    }
+    return cnt;
+}
 
-/**//*/*/
+void getFibo(int n) {
+    int f1 = 1;
+    int f2 = 1;
+    int next = f1 + f2;
+    while (next < n) {
+        next = f1 + f2;
+        printf("fibo: %d\n", next);
+        f1 = f2;
+        f2 = next;
+    }
+}
 
-/***
- *
- * @return
- */
-
- /** /
-  *
-  *
-  */
-
-  int main () {
-  /*//*//*PrintId*/ a+b
-  }
-
-int/*space*/main{}
-_();;{}printf("const and var // decl and def test\n");}
-const int array[2] = {1,2};
-
-int main(){
-    int c;
-    c = getint();
-    printf("output is %d",c);
-    return c;
+int main() {
+    printf("19373271\n");
+    int fiboMax;
+    fiboMax = getint();
+    getFibo(fiboMax);
+    int NNumberCnt = getNarcissisticNumber();
+    printf("NNumberCnt: %d\n", NNumberCnt);
+    return 0;
 }
