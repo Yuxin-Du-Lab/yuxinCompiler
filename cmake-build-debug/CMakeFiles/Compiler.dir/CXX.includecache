@@ -30,6 +30,18 @@ vector
 syntax.h
 /home/yuxin/CLionProjects/Compiler/syntax.h
 
+/home/yuxin/CLionProjects/Compiler/syntax.cpp
+fstream
+-
+utility
+-
+Token.h
+/home/yuxin/CLionProjects/Compiler/Token.h
+syntax.h
+/home/yuxin/CLionProjects/Compiler/syntax.h
+iostream
+/home/yuxin/CLionProjects/Compiler/iostream
+
 /home/yuxin/CLionProjects/Compiler/syntax.h
 Token.h
 /home/yuxin/CLionProjects/Compiler/Token.h

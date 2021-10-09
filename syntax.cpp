@@ -9,12 +9,16 @@
 
 std::ofstream writeSyntaxFile("output.txt");
 
-void writeFile4syntax(Token token) {
-    writeSyntaxFile << token.toString() << std::endl;
+void writeFile4syntax(Token token, bool scanning = false) {
+    if (!scanning) {
+        writeSyntaxFile << token.toString() << std::endl;
+    }
 }
 
-void writeFile4syntax(const std::string &funcName) {
-    writeSyntaxFile << "<" << funcName << ">" << std::endl;
+void writeFile4syntax(const std::string &funcName, bool scanning = false) {
+    if (!scanning) {
+        writeSyntaxFile << "<" << funcName << ">" << std::endl;
+    }
 }
 
 
@@ -308,7 +312,6 @@ FuncFParams *getFuncFParams(std::vector<Token> wordList, int *pointer) {
     getFuncFParam(wordList, pointer);
     while (wordList[*pointer].getIdentity() == COMMA) {
         writeFile4syntax(wordList[(*pointer)]);
-        writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
         getFuncFParam(wordList, pointer);
     }
@@ -347,41 +350,43 @@ FuncFParam *getFuncFParam(std::vector<Token> wordList, int *pointer) {
     return funcFParamptr;
 }
 
-FuncRParams *getFuncRParams(std::vector<Token> wordList, int *pointer) {
+FuncRParams *getFuncRParams(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *funcRParamsptr = new FuncRParams();
-    getExp(wordList, pointer);
+    getExp(wordList, pointer, scanning);
     while (wordList[*pointer].getIdentity() == COMMA) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getExp(wordList, pointer);
+        getExp(wordList, pointer, scanning);
     }
-    writeFile4syntax("FuncRParams");
+    writeFile4syntax("FuncRParams", scanning);
     return funcRParamsptr;
 }
 
-UnaryExp *getUnaryExp(std::vector<Token> wordList, int *pointer) {
+UnaryExp *getUnaryExp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *unaryExpptr = new UnaryExp();
     if (wordList[*pointer].getIdentity() == IDENFR) {
         int scan = *pointer;
         scan++;
         if (wordList[scan].getIdentity() == LPARENT) {
 //            function
-            writeFile4syntax(wordList[(*pointer)]);
-            (*pointer)++;
+            writeFile4syntax(wordList[(*pointer)], scanning);
+            (*pointer)++;  // for ident
             if (wordList[*pointer].getIdentity() == LPARENT) {
 //                [FuncRParams]
+                writeFile4syntax(wordList[(*pointer)], scanning);
+                (*pointer)++;   // for (
                 if (wordList[*pointer].getIdentity() != RPARENT) {
-                    getFuncRParams(wordList, pointer);
+                    getFuncRParams(wordList, pointer, scanning);
                 }
                 if (wordList[*pointer].getIdentity() == RPARENT) {
-                    writeFile4syntax(wordList[(*pointer)]);
+                    writeFile4syntax(wordList[(*pointer)], scanning);
                     (*pointer)++;
                 }
             }
         } else {
 //            LVal
 //            getPrimaryExp
-            getPrimaryExp(wordList, pointer);
+            getPrimaryExp(wordList, pointer, scanning);
         }
     } else {
 //      PrimaryExp or UnaryOp UnaryExp or exception
@@ -389,57 +394,57 @@ UnaryExp *getUnaryExp(std::vector<Token> wordList, int *pointer) {
             wordList[*pointer].getIdentity() == MINU ||
             wordList[*pointer].getIdentity() == NOT
                 ) {
-            getUnaryOp(wordList, pointer);
-            getUnaryExp(wordList, pointer);
+            getUnaryOp(wordList, pointer, scanning);
+            getUnaryExp(wordList, pointer, scanning);
         } else {
 //            getPrimaryExp
-            getPrimaryExp(wordList, pointer);
+            getPrimaryExp(wordList, pointer, scanning);
         }
     }
-    writeFile4syntax("UnaryExp");
+    writeFile4syntax("UnaryExp", scanning);
     return unaryExpptr;
 }
 
-UnaryOp *getUnaryOp(std::vector<Token> wordList, int *pointer) {
+UnaryOp *getUnaryOp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *unaryOpptr = new UnaryOp();
     if (wordList[*pointer].getIdentity() == PLUS ||
         wordList[*pointer].getIdentity() == MINU ||
         wordList[*pointer].getIdentity() == NOT
             ) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
     }
-    writeFile4syntax("UnaryOp");
+    writeFile4syntax("UnaryOp", scanning);
     return unaryOpptr;
 }
 
-PrimaryExp *getPrimaryExp(std::vector<Token> wordList, int *pointer) {
+PrimaryExp *getPrimaryExp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *primaryExpptr = new PrimaryExp();
     if (wordList[*pointer].getIdentity() == LPARENT) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
 //        getExp
-        getExp(wordList, pointer);
+        getExp(wordList, pointer, scanning);
         if (wordList[*pointer].getIdentity() == RPARENT) {
-            writeFile4syntax(wordList[(*pointer)]);
+            writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
         }
     } else if (wordList[*pointer].getIdentity() == IDENFR) {
-        getLVal(wordList, pointer);
+        getLVal(wordList, pointer, scanning);
     } else if (wordList[*pointer].getIdentity() == INTCON) {
-        getNumber(wordList, pointer);
+        getNumber(wordList, pointer, scanning);
     }
-    writeFile4syntax("PrimaryExp");
+    writeFile4syntax("PrimaryExp", scanning);
     return primaryExpptr;
 }
 
-Number *getNumber(std::vector<Token> wordList, int *pointer) {
+Number *getNumber(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *numberptr = new Number();
     if (wordList[*pointer].getIdentity() == INTCON) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
     }
-    writeFile4syntax("Number");
+    writeFile4syntax("Number", scanning);
     return numberptr;
 }
 
@@ -454,6 +459,7 @@ LOrExp *getLOrExp(std::vector<Token> wordList, int *pointer) {
     auto *lOrExpptr = new LOrExp();
     getLAndExp(wordList, pointer);
     while (wordList[(*pointer)].getIdentity() == OR) {
+        writeFile4syntax("LOrExp");
         (*pointer)++;
         writeFile4syntax(wordList[(*pointer)]);
         getLAndExp(wordList, pointer);
@@ -466,6 +472,7 @@ LAndExp *getLAndExp(std::vector<Token> wordList, int *pointer) {
     auto *lANdExpptr = new LAndExp();
     getEqExp(wordList, pointer);
     while (wordList[(*pointer)].getIdentity() == AND) {
+        writeFile4syntax("LAndExp");
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
         getEqExp(wordList, pointer);
@@ -478,6 +485,7 @@ EqExp *getEqExp(std::vector<Token> wordList, int *pointer) {
     auto *eqExpptr = new EqExp();
     getRelExp(wordList, pointer);
     while (wordList[(*pointer)].getIdentity() == EQL || wordList[(*pointer)].getIdentity() == NEQ) {
+        writeFile4syntax("EqExp");
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
         getRelExp(wordList, pointer);
@@ -494,6 +502,7 @@ RelExp *getRelExp(std::vector<Token> wordList, int *pointer) {
            wordList[(*pointer)].getIdentity() == GRE ||
            wordList[(*pointer)].getIdentity() == GEQ
             ) {
+        writeFile4syntax("RelExp");
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
         getAddExp(wordList, pointer);
@@ -502,62 +511,64 @@ RelExp *getRelExp(std::vector<Token> wordList, int *pointer) {
     return relExpptr;
 }
 
-AddExp *getAddExp(std::vector<Token> wordList, int *pointer) {
+AddExp *getAddExp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *addExpptr = new AddExp();
-    getMulExp(wordList, pointer);
+    getMulExp(wordList, pointer, scanning);
     while (wordList[(*pointer)].getIdentity() == PLUS ||
            wordList[(*pointer)].getIdentity() == MINU
             ) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax("AddExp", scanning);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getMulExp(wordList, pointer);
+        getMulExp(wordList, pointer, scanning);
     }
-    writeFile4syntax("AddExp");
+    writeFile4syntax("AddExp", scanning);
     return addExpptr;
 }
 
-MulExp *getMulExp(std::vector<Token> wordList, int *pointer) {
+MulExp *getMulExp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *mulExpptr = new MulExp();
-    getUnaryExp(wordList, pointer);
+    getUnaryExp(wordList, pointer, scanning);
     while (wordList[(*pointer)].getIdentity() == MULT ||
            wordList[(*pointer)].getIdentity() == DIV ||
            wordList[(*pointer)].getIdentity() == MOD
             ) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax("MulExp", scanning);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getUnaryExp(wordList, pointer);
+        getUnaryExp(wordList, pointer, scanning);
     }
-    writeFile4syntax("MulExp");
+    writeFile4syntax("MulExp", scanning);
     return mulExpptr;
 }
 
-LVal *getLVal(std::vector<Token> wordList, int *pointer) {
+LVal *getLVal(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *lValptr = new LVal();
     if (wordList[(*pointer)].getIdentity() == IDENFR) {
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
     }
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
 //            getExp
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getExp(wordList, pointer);
+        getExp(wordList, pointer, scanning);
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
-            writeFile4syntax(wordList[(*pointer)]);
+            writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
         }
     }
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
 //            getExp
-        writeFile4syntax(wordList[(*pointer)]);
+        writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getExp(wordList, pointer);
+        getExp(wordList, pointer, scanning);
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
-            writeFile4syntax(wordList[(*pointer)]);
+            writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
         }
     }
-    writeFile4syntax("LVal");
+    writeFile4syntax("LVal", scanning);
     return lValptr;
 }
 
@@ -640,7 +651,7 @@ ConstInitVal *getConstInitVal(std::vector<Token> wordList, int *pointer) {
         }
     } else {
 //        getConstExp
-        getExp(wordList, pointer);
+        getConstExp(wordList, pointer);
     }
     writeFile4syntax("ConstInitVal");
     return constInitValptr;
@@ -715,6 +726,10 @@ InitVal *getInitVal(std::vector<Token> wordList, int *pointer) {
                 (*pointer)++;
                 getInitVal(wordList, pointer);
             }
+            if (wordList[(*pointer)].getIdentity() == RBRACE) {
+                writeFile4syntax(wordList[(*pointer)]);
+                (*pointer)++;
+            }
         }
     } else {
 //        getExp();
@@ -727,13 +742,13 @@ InitVal *getInitVal(std::vector<Token> wordList, int *pointer) {
 ConstExp *getConstExp(std::vector<Token> wordList, int *pointer) {
     auto *constExpptr = new ConstExp();
     getAddExp(std::move(wordList), pointer);
-    writeFile4syntax("ContExp");
+    writeFile4syntax("ConstExp");
     return constExpptr;
 }
 
-Exp *getExp(std::vector<Token> wordList, int *pointer) {
+Exp *getExp(std::vector<Token> wordList, int *pointer, bool scanning) {
     auto *expptr = new Exp();
-    getAddExp(std::move(wordList), pointer);
-    writeFile4syntax("Exp");
+    getAddExp(std::move(wordList), pointer, scanning);
+    writeFile4syntax("Exp", scanning);
     return expptr;
 }

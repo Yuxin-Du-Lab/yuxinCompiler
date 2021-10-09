@@ -28,7 +28,7 @@ VarDecl *getVarDecl(std::vector<Token> wordList, int *pointer);
 
 Stmt *getSmt(std::vector<Token> wordList, int *pointer);
 
-LVal *getLVal(std::vector<Token> wordList, int *pointer);
+LVal *getLVal(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
 Cond *getCond(std::vector<Token> wordList, int *pointer);
 
@@ -42,13 +42,13 @@ RelExp *getRelExp(std::vector<Token> wordList, int *pointer);
 
 AddExp *getAddExp(std::vector<Token> wordList, int *pointer);
 
-MulExp *getMulExp(std::vector<Token> wordList, int *pointer);
+MulExp *getMulExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
-UnaryExp *getUnaryExp(std::vector<Token> wordList, int *pointer);
+UnaryExp *getUnaryExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
-PrimaryExp *getPrimaryExp(std::vector<Token> wordList, int *pointer);
+PrimaryExp *getPrimaryExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
-Number *getNumber(std::vector<Token> wordList, int *pointer);
+Number *getNumber(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
 VarDef *getVarDef(std::vector<Token> wordList, int *pointer);
 
@@ -56,11 +56,11 @@ ConstExp *getConstExp(std::vector<Token> wordList, int *pointer);
 
 InitVal *getInitVal(std::vector<Token> wordList, int *pointer);
 
-UnaryOp *getUnaryOp(std::vector<Token> wordList, int *pointer);
+UnaryOp *getUnaryOp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
-Exp *getExp(std::vector<Token> wordList, int *pointer);
+Exp *getExp(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
-FuncRParams *getFuncRParams(std::vector<Token> wordList, int *pointer);
+FuncRParams *getFuncRParams(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
 FuncType *getFuncType(std::vector<Token> wordList, int *pointer);
 
