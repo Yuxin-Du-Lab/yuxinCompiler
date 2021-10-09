@@ -468,8 +468,8 @@ LOrExp *getLOrExp(std::vector<Token> wordList, int *pointer) {
     getLAndExp(wordList, pointer);
     while (wordList[(*pointer)].getIdentity() == OR) {
         writeFile4syntax("LOrExp");
-        (*pointer)++;
         writeFile4syntax(wordList[(*pointer)]);
+        (*pointer)++;
         getLAndExp(wordList, pointer);
     }
     writeFile4syntax("LOrExp");
