@@ -129,6 +129,30 @@ Compiler/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/build
 .PHONY : Compiler/fast
 
+AST.o: AST.cpp.o
+.PHONY : AST.o
+
+# target to build an object file
+AST.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/AST.cpp.o
+.PHONY : AST.cpp.o
+
+AST.i: AST.cpp.i
+.PHONY : AST.i
+
+# target to preprocess a source file
+AST.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/AST.cpp.i
+.PHONY : AST.cpp.i
+
+AST.s: AST.cpp.s
+.PHONY : AST.s
+
+# target to generate assembly for a file
+AST.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/AST.cpp.s
+.PHONY : AST.cpp.s
+
 Token.o: Token.cpp.o
 .PHONY : Token.o
 
@@ -225,30 +249,6 @@ syntax.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntax.cpp.s
 .PHONY : syntax.cpp.s
 
-syntaxLib.o: syntaxLib.cpp.o
-.PHONY : syntaxLib.o
-
-# target to build an object file
-syntaxLib.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.o
-.PHONY : syntaxLib.cpp.o
-
-syntaxLib.i: syntaxLib.cpp.i
-.PHONY : syntaxLib.i
-
-# target to preprocess a source file
-syntaxLib.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.i
-.PHONY : syntaxLib.cpp.i
-
-syntaxLib.s: syntaxLib.cpp.s
-.PHONY : syntaxLib.s
-
-# target to generate assembly for a file
-syntaxLib.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Compiler.dir/build.make CMakeFiles/Compiler.dir/syntaxLib.cpp.s
-.PHONY : syntaxLib.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -258,6 +258,9 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... Compiler"
+	@echo "... AST.o"
+	@echo "... AST.i"
+	@echo "... AST.s"
 	@echo "... Token.o"
 	@echo "... Token.i"
 	@echo "... Token.s"
@@ -270,9 +273,6 @@ help:
 	@echo "... syntax.o"
 	@echo "... syntax.i"
 	@echo "... syntax.s"
-	@echo "... syntaxLib.o"
-	@echo "... syntaxLib.i"
-	@echo "... syntaxLib.s"
 .PHONY : help
 
 

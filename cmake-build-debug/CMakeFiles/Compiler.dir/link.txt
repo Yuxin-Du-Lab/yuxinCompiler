@@ -1,1 +1,1 @@
-/usr/bin/c++ -g CMakeFiles/Compiler.dir/main.cpp.o CMakeFiles/Compiler.dir/lexer.cpp.o CMakeFiles/Compiler.dir/Token.cpp.o CMakeFiles/Compiler.dir/syntax.cpp.o CMakeFiles/Compiler.dir/syntaxLib.cpp.o -o Compiler 
+/usr/bin/c++ -g CMakeFiles/Compiler.dir/main.cpp.o CMakeFiles/Compiler.dir/lexer.cpp.o CMakeFiles/Compiler.dir/Token.cpp.o CMakeFiles/Compiler.dir/syntax.cpp.o CMakeFiles/Compiler.dir/AST.cpp.o -o Compiler 

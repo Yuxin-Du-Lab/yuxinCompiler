@@ -6,9 +6,41 @@
 
 #IncludeRegexTransform: 
 
+/home/yuxin/CLionProjects/Compiler/AST.cpp
+AST.h
+/home/yuxin/CLionProjects/Compiler/AST.h
+
+/home/yuxin/CLionProjects/Compiler/AST.h
+iostream
+/home/yuxin/CLionProjects/Compiler/iostream
+vector
+/home/yuxin/CLionProjects/Compiler/vector
+Token.h
+/home/yuxin/CLionProjects/Compiler/Token.h
+
 /home/yuxin/CLionProjects/Compiler/Token.h
 iostream
 /home/yuxin/CLionProjects/Compiler/iostream
+
+/home/yuxin/CLionProjects/Compiler/lexer.h
+iostream
+-
+fstream
+-
+vector
+/home/yuxin/CLionProjects/Compiler/vector
+cstring
+-
+Token.h
+/home/yuxin/CLionProjects/Compiler/Token.h
+
+/home/yuxin/CLionProjects/Compiler/main.cpp
+lexer.h
+/home/yuxin/CLionProjects/Compiler/lexer.h
+vector
+/home/yuxin/CLionProjects/Compiler/vector
+syntax.h
+/home/yuxin/CLionProjects/Compiler/syntax.h
 
 /home/yuxin/CLionProjects/Compiler/syntax.cpp
 fstream
@@ -27,14 +59,6 @@ Token.h
 /home/yuxin/CLionProjects/Compiler/Token.h
 vector
 /home/yuxin/CLionProjects/Compiler/vector
-syntaxLib.h
-/home/yuxin/CLionProjects/Compiler/syntaxLib.h
-
-/home/yuxin/CLionProjects/Compiler/syntaxLib.h
-iostream
-/home/yuxin/CLionProjects/Compiler/iostream
-vector
-/home/yuxin/CLionProjects/Compiler/vector
-Token.h
-/home/yuxin/CLionProjects/Compiler/Token.h
+AST.h
+/home/yuxin/CLionProjects/Compiler/AST.h
 

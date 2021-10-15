@@ -82,6 +82,12 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/AST.cpp">
+			<Option target="Compiler"/>
+		</Unit>
+		<Unit filename="/home/yuxin/CLionProjects/Compiler/AST.h">
+			<Option target="Compiler"/>
+		</Unit>
 		<Unit filename="/home/yuxin/CLionProjects/Compiler/Token.cpp">
 			<Option target="Compiler"/>
 		</Unit>
@@ -101,12 +107,6 @@
 			<Option target="Compiler"/>
 		</Unit>
 		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntax.h">
-			<Option target="Compiler"/>
-		</Unit>
-		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntaxLib.cpp">
-			<Option target="Compiler"/>
-		</Unit>
-		<Unit filename="/home/yuxin/CLionProjects/Compiler/syntaxLib.h">
 			<Option target="Compiler"/>
 		</Unit>
 		<Unit filename="/home/yuxin/CLionProjects/Compiler/CMakeLists.txt">

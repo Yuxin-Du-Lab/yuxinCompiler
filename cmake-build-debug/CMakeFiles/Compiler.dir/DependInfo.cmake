@@ -8,11 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/yuxin/CLionProjects/Compiler/AST.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/AST.cpp.o"
   "/home/yuxin/CLionProjects/Compiler/Token.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/Token.cpp.o"
   "/home/yuxin/CLionProjects/Compiler/lexer.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/lexer.cpp.o"
   "/home/yuxin/CLionProjects/Compiler/main.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/main.cpp.o"
   "/home/yuxin/CLionProjects/Compiler/syntax.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/syntax.cpp.o"
-  "/home/yuxin/CLionProjects/Compiler/syntaxLib.cpp" "/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles/Compiler.dir/syntaxLib.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

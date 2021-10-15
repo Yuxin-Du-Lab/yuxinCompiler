@@ -118,18 +118,18 @@ CMakeFiles/Compiler.dir/syntax.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/syntax.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/yuxin/CLionProjects/Compiler/syntax.cpp -o CMakeFiles/Compiler.dir/syntax.cpp.s
 
-CMakeFiles/Compiler.dir/syntaxLib.cpp.o: CMakeFiles/Compiler.dir/flags.make
-CMakeFiles/Compiler.dir/syntaxLib.cpp.o: ../syntaxLib.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Compiler.dir/syntaxLib.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/syntaxLib.cpp.o -c /home/yuxin/CLionProjects/Compiler/syntaxLib.cpp
+CMakeFiles/Compiler.dir/AST.cpp.o: CMakeFiles/Compiler.dir/flags.make
+CMakeFiles/Compiler.dir/AST.cpp.o: ../AST.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/Compiler.dir/AST.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/Compiler.dir/AST.cpp.o -c /home/yuxin/CLionProjects/Compiler/AST.cpp
 
-CMakeFiles/Compiler.dir/syntaxLib.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/syntaxLib.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/yuxin/CLionProjects/Compiler/syntaxLib.cpp > CMakeFiles/Compiler.dir/syntaxLib.cpp.i
+CMakeFiles/Compiler.dir/AST.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/Compiler.dir/AST.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/yuxin/CLionProjects/Compiler/AST.cpp > CMakeFiles/Compiler.dir/AST.cpp.i
 
-CMakeFiles/Compiler.dir/syntaxLib.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/syntaxLib.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/yuxin/CLionProjects/Compiler/syntaxLib.cpp -o CMakeFiles/Compiler.dir/syntaxLib.cpp.s
+CMakeFiles/Compiler.dir/AST.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/Compiler.dir/AST.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/yuxin/CLionProjects/Compiler/AST.cpp -o CMakeFiles/Compiler.dir/AST.cpp.s
 
 # Object files for target Compiler
 Compiler_OBJECTS = \
@@ -137,7 +137,7 @@ Compiler_OBJECTS = \
 "CMakeFiles/Compiler.dir/lexer.cpp.o" \
 "CMakeFiles/Compiler.dir/Token.cpp.o" \
 "CMakeFiles/Compiler.dir/syntax.cpp.o" \
-"CMakeFiles/Compiler.dir/syntaxLib.cpp.o"
+"CMakeFiles/Compiler.dir/AST.cpp.o"
 
 # External object files for target Compiler
 Compiler_EXTERNAL_OBJECTS =
@@ -146,7 +146,7 @@ Compiler: CMakeFiles/Compiler.dir/main.cpp.o
 Compiler: CMakeFiles/Compiler.dir/lexer.cpp.o
 Compiler: CMakeFiles/Compiler.dir/Token.cpp.o
 Compiler: CMakeFiles/Compiler.dir/syntax.cpp.o
-Compiler: CMakeFiles/Compiler.dir/syntaxLib.cpp.o
+Compiler: CMakeFiles/Compiler.dir/AST.cpp.o
 Compiler: CMakeFiles/Compiler.dir/build.make
 Compiler: CMakeFiles/Compiler.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/yuxin/CLionProjects/Compiler/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX executable Compiler"
