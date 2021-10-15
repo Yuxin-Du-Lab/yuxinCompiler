@@ -30,7 +30,7 @@ ConstInitVal *getConstInitVal(std::vector<Token> wordList, int *pointer);
 
 VarDecl *getVarDecl(std::vector<Token> wordList, int *pointer);
 
-Stmt *getSmt(std::vector<Token> wordList, int *pointer);
+Stmt *getStmt(std::vector<Token> wordList, int *pointer);
 
 LVal *getLVal(std::vector<Token> wordList, int *pointer, bool scanning = false);
 
