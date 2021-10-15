@@ -2,9 +2,10 @@
 // Created by yuxin on 2021/10/3.
 //
 
-#ifndef COMPILER_AST_H
-#define COMPILER_AST_H
+#ifndef COMPILER_ASTBUILDER_H
+#define COMPILER_ASTBUILDER_H
 
+#include <fstream>
 #include "iostream"
 #include "vector"
 #include "Token.h"
@@ -23,44 +24,58 @@ class UnaryOp {
 // TODO
 public:
     void setUnaryOp(Token *token);
+
+    void print(int tab);
 };
 
 class Number {
     Token *intConst;
 public:
     void setIntConst(Token *token);
+
+    void print(int tab);
 };
 
 class PrimaryExp {
-
+public:
+    virtual void print(int tab) = 0;
 };
 
 class ExpPrimaryExp : public PrimaryExp {
     Exp *exp;
 public:
     void setPrimaryExp(Exp *exp);
+
+    void print(int tab);
 };
 
 class LValPrimaryExp : public PrimaryExp {
     LVal *lVal;
 public:
     void setPrimaryLVal(LVal *lVal);
+
+    void print(int tab);
 };
 
 class NumberPrimaryExp : public PrimaryExp {
     Number *number;
 public:
     void setPrimaryNumber(Number *number);
+
+    void print(int tab);
 };
 
 class UnaryExp {
-
+public:
+    virtual void print(int tab) = 0;
 };
 
 class PrimaryUnaryExp : public UnaryExp {
     PrimaryExp *primaryExp;
 public:
     void setPrimaryExp(PrimaryExp *primaryExp);
+
+    void print(int tab);
 };
 
 class FuncUnaryExp : public UnaryExp {
@@ -68,7 +83,10 @@ class FuncUnaryExp : public UnaryExp {
     FuncRParams *funcRParams;
 public:
     void setFuncUnaryIdent(Token *token);
+
     void setFuncRParams(FuncRParams *funcRParams);
+
+    void print(int tab);
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -76,7 +94,10 @@ class UnaryUnaryExp : public UnaryExp {
     UnaryExp *unaryExp;
 public:
     void setUnaryOp(UnaryOp *unaryOp);
+
     void setUnaryExp(UnaryExp *unaryExp);
+
+    void print(int tab);
 };
 
 class MulOpTree {
@@ -86,15 +107,22 @@ class MulOpTree {
     UnaryExp *value;
 public:
     void setIsLeaf(bool isLeaf);
+
     void setOp(Token *token);
+
     void setBranch(MulOpTree *mulOpTree, int child);
+
     void serValue(UnaryExp *value);
+
+    void print(int tab);
 };
 
 class MulExp {
     MulOpTree *root;
 public:
     void setRoot(MulOpTree *root);
+
+    void print(int tab);
 };
 
 class AddOpTree {
@@ -104,15 +132,22 @@ class AddOpTree {
     MulExp *value;
 public:
     void setIsLeaf(bool isLeaf);
+
     void setOp(Token *token);
+
     void setBranch(AddOpTree *addOpTree, int child);
+
     void serValue(MulExp *value);
+
+    void print(int tab);
 };
 
 class AddExp {
     AddOpTree *root;
 public:
     void setRoot(AddOpTree *root);
+
+    void print(int tab);
 };
 
 class RelOpTree {
@@ -122,15 +157,22 @@ class RelOpTree {
     AddExp *value;
 public:
     void setIsLeaf(bool isLeaf);
+
     void setOp(Token *token);
+
     void setBranch(RelOpTree *relOpTree, int child);
+
     void setLeafValue(AddExp *addExp);
+
+    void print(int tab);
 };
 
 class RelExp {
     RelOpTree *root;
 public:
     void setRoot(RelOpTree *root);
+
+    void print(int tab);
 };
 
 class EqOpTree {
@@ -140,33 +182,46 @@ class EqOpTree {
     RelExp *value;
 public:
     void setIsLeaf(bool isLeaf);
+
     void setOp(Token *token);
+
     void setBranch(EqOpTree *eqOpTree, int child);
+
     void setLeafValue(RelExp *relExp);
+
+    void print(int tab);
 };
 
 class EqExp {
     EqOpTree *root;
 public:
     void setEqExpRoot(EqOpTree *root);
+
+    void print(int tab);
 };
 
 class LAndExp {
-    std::vector<EqExp> eqExps;
+    std::vector<EqExp*> eqExps;
 public:
-    void addEqExp(EqExp eqExp);
+    void addEqExp(EqExp *eqExp);
+
+    void print(int tab);
 };
 
 class LOrExp {
-    std::vector<LAndExp> lAndExps;
+    std::vector<LAndExp*> lAndExps;
 public:
-    void addLAndExp(LAndExp lAndExp);
+    void addLAndExp(LAndExp *lAndExp);
+
+    void print(int tab);
 };
 
 class Cond {
     LOrExp *lOrExp;
 public:
     void setLOrExp(LOrExp *lOrExp);
+
+    void print(int tab);
 };
 
 class LVal {
@@ -175,25 +230,35 @@ class LVal {
     Exp *exps[2];
 public:
     void setLValIdent(Token *token);
+
     void setRow(int row);
+
     void setArrayExp(Exp *exp, int row);
+
+    void print(int tab);
 };
 
 class Exp {
     AddExp *addExp;
 public:
     void setAddExp(AddExp *addExp);
+
+    void print(int tab);
 };
 
 
 class InitVal {
     Exp *exp;
     int row;
-    std::vector<InitVal> initVals;
+    std::vector<InitVal*> initVals;
 public:
     void setExp(Exp *exp);
+
     void setRow(int row);
-    void addInitVal(InitVal initVal);
+
+    void addInitVal(InitVal *initVal);
+
+    void print(int tab);
 };
 
 class ConstExp {
@@ -202,6 +267,8 @@ class ConstExp {
 // TODO
 public:
     void setAddExp(AddExp *addExp);
+
+    void print(int tab);
 };
 
 class VarDef {
@@ -212,27 +279,39 @@ class VarDef {
     InitVal *initVal;
 public:
     void setIdent(Token *token);
+
     void setRow(int row);
+
     void setArrayConstExp(ConstExp *constExp, int row);
+
     void setHasInitVal(bool hasInitVal);
+
     void setInitVal(InitVal *initVal);
+
+    void print(int tab);
 };
 
 
 class VarDecl {
-    std::vector<VarDef> varDefs;
+    std::vector<VarDef*> varDefs;
 public:
-    void addVarDef(VarDef varDef);
+    void addVarDef(VarDef *varDef);
+
+    void print(int tab);
 };
 
 class ConstInitVal {
     ConstExp *constExp;
     int row;
-    std::vector<ConstInitVal> constInitVals;
+    std::vector<ConstInitVal*> constInitVals;
 public:
     void setConstExp(ConstExp *constExp);
+
     void setRow(int row);
-    void addConstInitVal(ConstInitVal constInitVal);
+
+    void addConstInitVal(ConstInitVal *constInitVal);
+
+    void print(int tab);
 };
 
 class ConstDef {
@@ -242,29 +321,41 @@ class ConstDef {
     ConstInitVal *constInitVal;
 public:
     void setIdent(Token *token);
+
     void setRow(int row);
+
     void setArrayConstExp(ConstExp *constExp, int row);
+
     void setConstInitVal(ConstInitVal *constInitVal);
+
+    void print(int tab);
 };
 
 class ConstDecl {
-    std::vector<ConstDef> constDefs;
+    std::vector<ConstDef*> constDefs;
 public:
-    void addConstDef(ConstDef constDef);
+    void addConstDef(ConstDef *constDef);
+
+    void print(int tab);
 };
 
 class Block {
-    std::vector<ConstDecl> constDecls;
-    std::vector<VarDecl> varDecls;
-    std::vector<Stmt> stmts;
+    std::vector<ConstDecl*> constDecls;
+    std::vector<VarDecl*> varDecls;
+    std::vector<Stmt *> stmts;
 public:
-    void addConstDecl(ConstDecl constDecl);
-    void addVarDecl(VarDecl varDecl);
-    void addStmt(Stmt stmt);
+    void addConstDecl(ConstDecl *constDecl);
+
+    void addVarDecl(VarDecl *varDecl);
+
+    void addStmt(Stmt *stmt);
+
+    void print(int tab);
 };
 
 class Stmt {
-
+public:
+    virtual void print(int tab) = 0;
 };
 
 class LValStmt : public Stmt {
@@ -272,19 +363,26 @@ class LValStmt : public Stmt {
     Exp *exp;
 public:
     void setLVal(LVal *lVal);
+
     void setExp(Exp *exp);
+
+    void print(int tab);
 };
 
 class ExpStmt : public Stmt {
     Exp *exp;
 public:
     void setExp(Exp *exp);
+
+    void print(int tab);
 };
 
 class BlockStmt : public Stmt {
     Block *block;
 public:
     void setBlock(Block *block);
+
+    void print(int tab);
 };
 
 class IfStmt : public Stmt {
@@ -293,8 +391,12 @@ class IfStmt : public Stmt {
     Stmt *elseStmt;
 public:
     void setCond(Cond *cond);
+
     void setIfStmt(Stmt *stmt);
+
     void setElseStmt(Stmt *stmt);
+
+    void print(int tab);
 };
 
 class WhileStmt : public Stmt {
@@ -302,33 +404,45 @@ class WhileStmt : public Stmt {
     Stmt *stmt;
 public:
     void setCond(Cond *cond);
+
     void setWhileStmt(Stmt *stmt);
+
+    void print(int tab);
 };
 
 class LoopStmt : public Stmt {
     Token *break_continue;
 public:
     void setToken(Token *token);
+
+    void print(int tab);
 };
 
 class ReturnStmt : public Stmt {
     Exp *exp;
 public:
     void setReturnExp(Exp *exp);
+
+    void print(int tab);
 };
 
 class GetintStmt : public Stmt {
     LVal *lVal;
 public:
     void setLVal(LVal *lVal);
+
+    void print(int tab);
 };
 
 class PrintfStmt : public Stmt {
     Token *formatString;
-    std::vector<Exp> formatExps;
+    std::vector<Exp *> formatExps;
 public:
     void setFormatString(Token *token);
-    void addFormatExp(Exp exp);
+
+    void addFormatExp(Exp *exp);
+
+    void print(int tab);
 };
 
 class FuncFParam {
@@ -337,24 +451,35 @@ class FuncFParam {
     ConstExp *constExp;
 public:
     void setFuncFParamIdent(Token *token);
+
     void setRow(int rowIn);
+
     void setConstExp(ConstExp *constExp);
+
+    void print(int tab);
 };
 
 class FuncFParams {
-    std::vector<FuncFParam> funcFParams;
+    std::vector<FuncFParam*> funcFParams;
 public:
-    void addFuncFParam(FuncFParam funcFParam);
+    void addFuncFParam(FuncFParam *funcFParam);
+
+    void print(int tab);
 };
 
 class FuncType {
     Token *funcType; // void or int
 public:
     void setFuncType(Token *funcType);
-};
 
+    void print(int tab);
+};
+//TODO
 class FuncRParams {
-    std::vector<Exp> paramExps;
+    std::vector<Exp*> paramExps;
+public:
+    void addParamsExp(Exp *exp);
+    void print(int tab);
 };
 
 class FuncDef {
@@ -364,9 +489,14 @@ class FuncDef {
     Block *block;
 public:
     void setFuncType(FuncType *funcType);
+
     void setFuncIdent(Token *token);
+
     void setFuncFParams(FuncFParams *funcFParams);
+
     void setFuncBlock(Block *block);
+
+    void print(int tab);
 };
 
 
@@ -374,19 +504,26 @@ class MainFuncDef {
     Block *block;
 public:
     void setBlock(Block *block);
+
+    void print(int tab);
 };
 
 class CompUnit {
 public:
-    std::vector<ConstDecl> constDecls;
-    std::vector<VarDecl> varDecls;
-    std::vector<FuncDef> funcDefs;
+    std::vector<ConstDecl*> constDecls;
+    std::vector<VarDecl*> varDecls;
+    std::vector<FuncDef*> funcDefs;
     MainFuncDef *mainFuncDef;
 public:
-    void addConstDecl(ConstDecl constDecl);
-    void addVarDecl(VarDecl varDecl);
-    void addFuncDef(FuncDef funcDef);
+    void addConstDecl(ConstDecl *constDecl);
+
+    void addVarDecl(VarDecl *varDecl);
+
+    void addFuncDef(FuncDef *funcDef);
+
     void setMainFuncDef(MainFuncDef *mainFuncDef);
+
+    void print();
 };
 
-#endif //COMPILER_AST_H
+#endif //COMPILER_ASTBUILDER_H

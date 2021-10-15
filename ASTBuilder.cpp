@@ -2,17 +2,17 @@
 // Created by yuxin on 2021/10/3.
 //
 
-#include "AST.h"
+#include "ASTBuilder.h"
 
-void CompUnit::addConstDecl(ConstDecl constDecl) {
+void CompUnit::addConstDecl(ConstDecl *constDecl) {
     this->constDecls.emplace_back(constDecl);
 }
 
-void CompUnit::addVarDecl(VarDecl varDecl) {
+void CompUnit::addVarDecl(VarDecl *varDecl) {
     this->varDecls.emplace_back(varDecl);
 }
 
-void CompUnit::addFuncDef(FuncDef funcDef) {
+void CompUnit::addFuncDef(FuncDef *funcDef) {
     this->funcDefs.emplace_back(funcDef);
 }
 
@@ -24,15 +24,19 @@ void MainFuncDef::setBlock(Block *block) {
     this->block = block;
 }
 
-void Block::addConstDecl(ConstDecl constDecl) {
+void FuncRParams::addParamsExp(Exp *exp) {
+    this->paramExps.emplace_back(exp);
+}
+
+void Block::addConstDecl(ConstDecl *constDecl) {
     this->constDecls.emplace_back(constDecl);
 }
 
-void Block::addVarDecl(VarDecl varDecl) {
+void Block::addVarDecl(VarDecl *varDecl) {
     this->varDecls.emplace_back(varDecl);
 }
 
-void Block::addStmt(Stmt stmt) {
+void Block::addStmt(Stmt *stmt) {
     this->stmts.emplace_back(stmt);
 }
 
@@ -64,7 +68,7 @@ void PrintfStmt::setFormatString(Token *token) {
     this->formatString = token;
 }
 
-void PrintfStmt::addFormatExp(Exp exp) {
+void PrintfStmt::addFormatExp(Exp *exp) {
     this->formatExps.emplace_back(exp);
 }
 
@@ -112,7 +116,7 @@ void FuncType::setFuncType(Token *funcType) {
     this->funcType = funcType;
 }
 
-void FuncFParams::addFuncFParam(FuncFParam funcFParam) {
+void FuncFParams::addFuncFParam(FuncFParam *funcFParam) {
     this->funcFParams.emplace_back(funcFParam);
 }
 
@@ -172,11 +176,11 @@ void Cond::setLOrExp(LOrExp *lOrExp) {
     this->lOrExp = lOrExp;
 }
 
-void LOrExp::addLAndExp(LAndExp lAndExp) {
+void LOrExp::addLAndExp(LAndExp *lAndExp) {
     this->lAndExps.emplace_back(lAndExp);
 }
 
-void LAndExp::addEqExp(EqExp eqExp) {
+void LAndExp::addEqExp(EqExp *eqExp) {
     this->eqExps.emplace_back(eqExp);
 }
 
@@ -272,7 +276,7 @@ void LVal::setLValIdent(Token *token) {
     this->ident = token;
 }
 
-void ConstDecl::addConstDef(ConstDef constDef) {
+void ConstDecl::addConstDef(ConstDef *constDef) {
     this->constDefs.emplace_back(constDef);
 }
 
@@ -300,11 +304,11 @@ void ConstInitVal::setConstExp(ConstExp *constExp) {
     this->constExp = constExp;
 }
 
-void ConstInitVal::addConstInitVal(ConstInitVal constInitVal) {
+void ConstInitVal::addConstInitVal(ConstInitVal *constInitVal) {
     this->constInitVals.emplace_back(constInitVal);
 }
 
-void VarDecl::addVarDef(VarDef varDef) {
+void VarDecl::addVarDef(VarDef *varDef) {
     this->varDefs.emplace_back(varDef);
 }
 
@@ -336,7 +340,7 @@ void InitVal::setExp(Exp *exp) {
     this->exp = exp;
 }
 
-void InitVal::addInitVal(InitVal initVal) {
+void InitVal::addInitVal(InitVal *initVal) {
     this->initVals.emplace_back(initVal);
 }
 
@@ -347,3 +351,4 @@ void ConstExp::setAddExp(AddExp *addExp) {
 void Exp::setAddExp(AddExp *addExp) {
     this->addExp = addExp;
 }
+

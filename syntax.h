@@ -7,7 +7,7 @@
 
 #include "Token.h"
 #include "vector"
-#include "AST.h"
+#include "ASTBuilder.h"
 
 
 void syntaxAnalysis(std::vector<Token> wordList);
