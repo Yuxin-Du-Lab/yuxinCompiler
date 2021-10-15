@@ -37,23 +37,35 @@ class Number {
 };
 
 class PrimaryExp {
-    int mode;
-//    mode 1
+
+};
+
+class ExpPrimaryExp : public PrimaryExp {
     Exp *exp;
-//    mode 2
+};
+
+class LValPrimaryExp : public PrimaryExp {
     LVal *lVal;
-//    mode 3
+};
+
+class NumberPrimaryExp : public PrimaryExp {
     Number *number;
 };
 
 class UnaryExp {
-    int mode;
-//    mode 1
+
+};
+
+class PrimaryUnaryExp : public UnaryExp {
     PrimaryExp *primaryExp;
-//    mode 2
+};
+
+class FuncUnaryExp : public UnaryExp {
     Token *ident;
     FuncRParams *funcRParams;
-//    mode 3
+};
+
+class UnaryUnaryExp : public UnaryExp {
     UnaryOp *unaryOp;
     UnaryExp *unaryExp;
 };
@@ -173,16 +185,48 @@ class Block {
 };
 
 class Stmt {
-    int mode;
-    LVal *baseLVal;  // for LVal, getint
-    Exp *baseExp;    // for LVal, Exp,
+
+};
+
+class LValStmt : public Stmt {
+    LVal *lVal;
+    Exp *exp;
+};
+
+class ExpStmt : public Stmt {
+    Exp *exp;
+};
+
+class BlockStmt : public Stmt {
     Block *block;
+};
+
+class IfStmt : public Stmt {
     Cond *cond;
-    bool hasElse;
-    Stmt *ifStmt, *elseStmt;
-    Token *continue_break;
+    Stmt *ifStmt;
+    Stmt *elseStmt;
+};
+
+class WhileStmt : public Stmt {
+    Cond *cond;
+    Stmt *stmt;
+};
+
+class LoopStmt : public Stmt {
+    Token *break_continue;
+};
+
+class ReturnStmt : public Stmt {
+    Stmt *stmt;
+};
+
+class GetintStmt : public Stmt {
+    LVal *lVal;
+};
+
+class PrintfStmt : public Stmt {
     Token *formatString;
-    std::vector<Exp> formatExps;    // for formatString exps
+    std::vector<Exp> formatExps;
 };
 
 class FuncFParam {
