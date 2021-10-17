@@ -493,7 +493,6 @@ std::string getFormString(const char bufferLine[], int *pointer) {
     }
     buf[index++] = bufferLine[*pointer];
     buf[index] = '\0';
-    (*pointer)++;
     std::string str(buf);
 //    formatString = &bufferLine[formStringBegin];
 //    formatString = formatString.substr(0, pointer - formStringBegin + 1);

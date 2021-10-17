@@ -26,6 +26,8 @@ public:
     void setUnaryOp(Token *token);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class Number {
@@ -34,11 +36,15 @@ public:
     void setIntConst(Token *token);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class PrimaryExp {
 public:
     virtual void print(int tab) {};
+
+//    virtual // std::string toString(); { return "base"; };
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -47,6 +53,8 @@ public:
     void setPrimaryExp(Exp *exp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -55,6 +63,8 @@ public:
     void setPrimaryLVal(LVal *lVal);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -63,11 +73,15 @@ public:
     void setPrimaryNumber(Number *number);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class UnaryExp {
 public:
     virtual void print(int tab) {};
+
+//    virtual // std::string toString(); { return "base"; };
 };
 
 class PrimaryUnaryExp : public UnaryExp {
@@ -76,6 +90,8 @@ public:
     void setPrimaryExp(PrimaryExp *primaryExp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class FuncUnaryExp : public UnaryExp {
@@ -87,6 +103,8 @@ public:
     void setFuncRParams(FuncRParams *funcRParams);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -98,6 +116,8 @@ public:
     void setUnaryExp(UnaryExp *unaryExp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class MulOpTree {
@@ -115,6 +135,8 @@ public:
     void serValue(UnaryExp *value);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class MulExp {
@@ -123,6 +145,8 @@ public:
     void setRoot(MulOpTree *root);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class AddOpTree {
@@ -140,6 +164,8 @@ public:
     void serValue(MulExp *value);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class AddExp {
@@ -148,6 +174,8 @@ public:
     void setRoot(AddOpTree *root);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class RelOpTree {
@@ -165,6 +193,8 @@ public:
     void setLeafValue(AddExp *addExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class RelExp {
@@ -173,6 +203,8 @@ public:
     void setRoot(RelOpTree *root);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class EqOpTree {
@@ -190,6 +222,8 @@ public:
     void setLeafValue(RelExp *relExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class EqExp {
@@ -198,6 +232,8 @@ public:
     void setEqExpRoot(EqOpTree *root);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class LAndExp {
@@ -206,6 +242,8 @@ public:
     void addEqExp(EqExp *eqExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class LOrExp {
@@ -214,6 +252,8 @@ public:
     void addLAndExp(LAndExp *lAndExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class Cond {
@@ -222,6 +262,8 @@ public:
     void setLOrExp(LOrExp *lOrExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class LVal {
@@ -236,6 +278,8 @@ public:
     void setArrayExp(Exp *exp, int row);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class Exp {
@@ -244,6 +288,8 @@ public:
     void setAddExp(AddExp *addExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 
@@ -259,6 +305,8 @@ public:
     void addInitVal(InitVal *initVal);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class ConstExp {
@@ -269,6 +317,8 @@ public:
     void setAddExp(AddExp *addExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class VarDef {
@@ -289,6 +339,8 @@ public:
     void setInitVal(InitVal *initVal);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 
@@ -298,6 +350,8 @@ public:
     void addVarDef(VarDef *varDef);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class ConstInitVal {
@@ -312,6 +366,8 @@ public:
     void addConstInitVal(ConstInitVal *constInitVal);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class ConstDef {
@@ -329,6 +385,8 @@ public:
     void setConstInitVal(ConstInitVal *constInitVal);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class ConstDecl {
@@ -337,6 +395,8 @@ public:
     void addConstDef(ConstDef *constDef);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class Block {
@@ -351,11 +411,15 @@ public:
     void addStmt(Stmt *stmt);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class Stmt {
 public:
     virtual void print(int tab) {};
+
+//    virtual // std::string toString(); { return "base"; };
 };
 
 class LValStmt : public Stmt {
@@ -367,6 +431,8 @@ public:
     void setExp(Exp *exp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class ExpStmt : public Stmt {
@@ -375,6 +441,8 @@ public:
     void setExp(Exp *exp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class BlockStmt : public Stmt {
@@ -383,6 +451,8 @@ public:
     void setBlock(Block *block);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class IfStmt : public Stmt {
@@ -397,6 +467,8 @@ public:
     void setElseStmt(Stmt *stmt);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class WhileStmt : public Stmt {
@@ -408,6 +480,8 @@ public:
     void setWhileStmt(Stmt *stmt);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class LoopStmt : public Stmt {
@@ -416,6 +490,8 @@ public:
     void setToken(Token *token);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class ReturnStmt : public Stmt {
@@ -424,6 +500,8 @@ public:
     void setReturnExp(Exp *exp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class GetintStmt : public Stmt {
@@ -432,6 +510,8 @@ public:
     void setLVal(LVal *lVal);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class PrintfStmt : public Stmt {
@@ -443,6 +523,8 @@ public:
     void addFormatExp(Exp *exp);
 
     void print(int tab) override;
+
+    // std::string toString();;
 };
 
 class FuncFParam {
@@ -457,6 +539,8 @@ public:
     void setConstExp(ConstExp *constExp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class FuncFParams {
@@ -465,6 +549,8 @@ public:
     void addFuncFParam(FuncFParam *funcFParam);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class FuncType {
@@ -473,6 +559,8 @@ public:
     void setFuncType(Token *funcType);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 //TODO
@@ -482,6 +570,8 @@ public:
     void addParamsExp(Exp *exp);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class FuncDef {
@@ -499,6 +589,8 @@ public:
     void setFuncBlock(Block *block);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 
@@ -508,6 +600,8 @@ public:
     void setBlock(Block *block);
 
     void print(int tab);
+
+    // std::string toString();;
 };
 
 class CompUnit {
@@ -526,6 +620,8 @@ public:
     void setMainFuncDef(MainFuncDef *mainFuncDef);
 
     void print();
+
+    // std::string toString();;
 };
 
 #endif //COMPILER_ASTBUILDER_H

@@ -25,6 +25,9 @@ void CompUnit::print() {
     for (auto iter: this->varDecls) {
         iter->print(tab + 1);
     }
+    for (auto iter: this->funcDefs) {
+        iter->print(tab + 1);
+    }
     this->mainFuncDef->print(tab + 1);
     jsonLikePrint("}", tab);
 }
@@ -385,7 +388,9 @@ void ReturnStmt::print(int tab) {
     jsonLikePrint("ReturnStmt", tab);
     jsonLikePrint("{", tab);
 
-    this->exp->print(tab + 1);
+    if (this->exp != nullptr) {
+        this->exp->print(tab + 1);
+    }
 
     jsonLikePrint("}", tab);
 }
@@ -426,6 +431,118 @@ void LOrExp::print(int tab) {
     jsonLikePrint("LOrExp", tab);
     jsonLikePrint("{", tab);
 
+    for (auto iter: this->lAndExps) {
+        iter->print(tab + 1);
+    }
+
+    jsonLikePrint("}", tab);
+}
+
+void LAndExp::print(int tab) {
+    jsonLikePrint("LAndExp", tab);
+    jsonLikePrint("{", tab);
+
+    for (auto iter: this->eqExps) {
+        iter->print(tab + 1);
+    }
+
+    jsonLikePrint("}", tab);
+}
+
+void EqExp::print(int tab) {
+    jsonLikePrint("EqExp", tab);
+    jsonLikePrint("{", tab);
+
+    this->root->print(tab + 1);
+
+    jsonLikePrint("}", tab);
+}
+
+void EqOpTree::print(int tab) {
+    jsonLikePrint("EqOpTree", tab);
+    jsonLikePrint("{", tab);
+
+    if (this->isLeaf) {
+        jsonLikePrint("isLeaf: true", tab + 1);
+        this->value->print(tab + 1);
+    } else {
+        jsonLikePrint("isLeaf: false", tab + 1);
+        jsonLikePrint(this->op->toString(), tab + 1);
+        this->branch[0]->print(tab + 1);
+        this->branch[1]->print(tab + 1);
+    }
+
+    jsonLikePrint("}", tab);
+}
+
+void RelExp::print(int tab) {
+    jsonLikePrint("RelExp", tab);
+    jsonLikePrint("{", tab);
+
+    this->root->print(tab + 1);
+
+    jsonLikePrint("}", tab);
+}
+
+void RelOpTree::print(int tab) {
+    jsonLikePrint("RelOpTree", tab);
+    jsonLikePrint("{", tab);
+
+    if (this->isLeaf) {
+        jsonLikePrint("isLeaf: true", tab + 1);
+        this->value->print(tab + 1);
+    } else {
+        jsonLikePrint("isLeaf: false", tab + 1);
+        jsonLikePrint(this->op->toString(), tab + 1);
+        this->branch[0]->print(tab + 1);
+        this->branch[1]->print(tab + 1);
+    }
+
+    jsonLikePrint("}", tab);
+}
+
+void FuncDef::print(int tab) {
+    jsonLikePrint("FuncDef", tab);
+    jsonLikePrint("{", tab);
+
+    jsonLikePrint(this->ident->toString(), tab + 1);
+    this->funcType->print(tab + 1);
+    this->funcFParams->print(tab + 1);
+    this->block->print(tab + 1);
+
+    jsonLikePrint("}", tab);
+}
+
+void FuncType::print(int tab) {
+    jsonLikePrint("FuncType", tab);
+    jsonLikePrint("{", tab);
+
+    jsonLikePrint(this->funcType->toString(), tab + 1);
+
+    jsonLikePrint("}", tab);
+}
+
+void FuncFParams::print(int tab) {
+    jsonLikePrint("FuncFParams", tab);
+    jsonLikePrint("{", tab);
+
+    for (auto iter: this->funcFParams) {
+        iter->print(tab + 1);
+    }
+
+    jsonLikePrint("}", tab);
+}
+
+void FuncFParam::print(int tab) {
+    jsonLikePrint("FuncFParam", tab);
+    jsonLikePrint("{", tab);
+
+    jsonLikePrint(this->ident->toString(), tab + 1);
+    jsonLikePrint(std::to_string(this->row), tab + 1);
+    if (this->row >= 2) {
+        jsonLikePrint("[][const exp]", tab + 1);
+        this->constExp->print(tab + 1);
+    }
 
     jsonLikePrint("}", tab);
 }

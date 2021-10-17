@@ -106,8 +106,6 @@ Block *getBlock(std::vector<Token> &wordList, int *pointer) {
 //            getStmt
             auto *stmt = getStmt(wordList, pointer);
             blockptr->addStmt(stmt);
-            int a = 0;
-            int b = 0;
         }
     }
 //    get a '}'
