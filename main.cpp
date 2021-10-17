@@ -16,7 +16,7 @@ int main() {
     std::ifstream readLexerFile("testfile.txt");
 //    std::ofstream writeLexerFile("output.txt");
     std::vector<Token> wordList = worldsAnalyse(readLexerFile);
-//    writeFile4WordList(wordList);
     syntaxAnalysis(wordList);
+    writeFile4WordList(wordList);
     return 0;
 }

@@ -19,15 +19,11 @@ void CompUnit::print() {
     int tab = 0;
     jsonLikePrint("CompUnit", tab);
     jsonLikePrint("{", tab);
-    auto iter1 = this->constDecls.begin();
-    while (iter1 != this->constDecls.end()) {
-        (*iter1)->print(tab + 1);
-        iter1++;
+    for (auto iter: this->constDecls) {
+        iter->print(tab + 1);
     }
-    auto iter2 = this->varDecls.begin();
-    while (iter2 != this->varDecls.end()) {
-        (*iter2)->print(tab + 1);
-        iter2++;
+    for (auto iter: this->varDecls) {
+        iter->print(tab + 1);
     }
     this->mainFuncDef->print(tab + 1);
     jsonLikePrint("}", tab);
@@ -36,10 +32,8 @@ void CompUnit::print() {
 void ConstDecl::print(int tab) {
     jsonLikePrint("ConstDecl", tab);
     jsonLikePrint("{", tab);
-    auto iter = this->constDefs.begin();
-    while (iter != this->constDefs.end()) {
-        (*iter)->print(tab + 1);
-        iter++;
+    for (auto iter: this->constDefs) {
+        iter->print(tab + 1);
     }
     jsonLikePrint("}", tab);
 }
@@ -48,10 +42,8 @@ void VarDecl::print(int tab) {
     jsonLikePrint("VarDecl", tab);
     jsonLikePrint("{", tab);
 
-    auto iter = this->varDefs.begin();
-    while (iter != this->varDefs.end()) {
-        (*iter)->print(tab + 1);
-        iter++;
+    for (auto iter: this->varDefs) {
+        iter->print(tab + 1);
     }
 
     jsonLikePrint("}", tab);
@@ -118,10 +110,8 @@ void InitVal::print(int tab) {
     if (this->row == 0) {
         this->exp->print(tab + 1);
     } else {
-        auto iter = this->initVals.begin();
-        while (iter != this->initVals.end()) {
-            (*iter)->print(tab + 1);
-            iter++;
+        for (auto iter: this->initVals) {
+            iter->print(tab + 1);
         }
     }
 
@@ -135,10 +125,8 @@ void ConstInitVal::print(int tab) {
     if (this->row == 0) {
         this->constExp->print(tab + 1);
     } else {
-        auto iter = this->constInitVals.begin();
-        while (iter != this->constInitVals.end()) {
-            (*iter)->print(tab + 1);
-            iter++;
+        for (auto iter: this->constInitVals) {
+            iter->print(tab + 1);
         }
     }
     jsonLikePrint("}", tab);
@@ -148,22 +136,16 @@ void Block::print(int tab) {
     jsonLikePrint("Block", tab);
     jsonLikePrint("{", tab);
 
-    auto iter1 = this->constDecls.begin();
-    while (iter1 != this->constDecls.end()) {
-        (*iter1)->print(tab + 1);
-        iter1++;
+    for (auto iter: this->constDecls) {
+        iter->print(tab + 1);
     }
 
-    auto iter2 = this->varDecls.begin();
-    while (iter2 != this->varDecls.end()) {
-        (*iter2)->print(tab + 1);
-        iter2++;
+    for (auto iter: this->varDecls) {
+        iter->print(tab + 1);
     }
 
-    auto iter3 = this->stmts.begin();
-    while (iter3 != this->stmts.end()) {
-        (*iter3)->print(tab + 1);
-        iter3++;
+    for (auto iter: this->stmts) {
+        iter->print(tab + 1);
     }
 
     jsonLikePrint("}", tab);
@@ -263,10 +245,8 @@ void FuncRParams::print(int tab) {
     jsonLikePrint("FuncRParams", tab);
     jsonLikePrint("{", tab);
 
-    auto iter = this->paramExps.begin();
-    while (iter != this->paramExps.end()) {
-        (*iter)->print(tab + 1);
-        iter++;
+    for (auto iter: this->paramExps) {
+        iter->print(tab + 1);
     }
 
     jsonLikePrint("}", tab);
@@ -423,13 +403,11 @@ void PrintfStmt::print(int tab) {
     jsonLikePrint("PrintfStmt", tab);
     jsonLikePrint("{", tab);
 
-//    jsonLikePrint(this->formatString->toString(), tab + 1);
+    jsonLikePrint(this->formatString->toString(), tab + 1);
 //    std::cout << this->formatString->toString() << std::endl;
-//    auto iter = this->formatExps.begin();
-//    while (iter != this->formatExps.end()) {
-//        (*iter)->print(tab + 1);
-//        iter++;
-//    }
+    for (auto iter: this->formatExps) {
+        iter->print(tab + 1);
+    }
 
     jsonLikePrint("}", tab);
 }

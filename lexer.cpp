@@ -5,7 +5,7 @@
 #include "lexer.h"
 #include "Token.h"
 
-std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
+std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
     char bufferLine[LINELENGTH];
     std::vector<Token> wordList;
 //    std::ifstream fileRead("testfile.txt");
@@ -31,7 +31,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                     pointer += 2;
                     continue;
                 } else {
-                    pointer ++;
+                    pointer++;
                     continue;
                 }
             }
@@ -50,8 +50,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                 pointer = getConstInteger(bufferLine, pointer, &value);
             } else if (isAlphaChar(c) || isUnderLine(c)) {
                 pointer = keyWordAnalyse(bufferLine, pointer, &identity, &value);
-            }
-            else {
+            } else {
 //                  simple char
                 switch (c) {
                     case ' ':
@@ -62,7 +61,8 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         break;
                     case '"':
                         identity = STRCON;
-                        pointer = getFormString(bufferLine, pointer + 1, &value);
+//                        pointer = getFormString(bufferLine, pointer + 1, &value);
+                        value = getFormString(bufferLine, &pointer);
                         break;
                     case '{':
                         identity = LBRACE;
@@ -116,7 +116,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '=') {
                             identity = NEQ;
                             value = "!=";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = NOT;
                             value = "!";
@@ -126,7 +126,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '&') {
                             identity = AND;
                             value = "&&";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = c;
                         }
@@ -135,7 +135,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '|') {
                             identity = OR;
                             value = "||";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = c;
                         }
@@ -148,7 +148,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '=') {
                             identity = LEQ;
                             value = "<=";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = LSS;
                             value = "<";
@@ -158,7 +158,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '=') {
                             identity = GEQ;
                             value = ">=";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = GRE;
                             value = ">";
@@ -168,7 +168,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                         if (bufferLine[pointer + 1] == '=') {
                             identity = EQL;
                             value = "==";
-                            pointer ++;
+                            pointer++;
                         } else {
                             identity = ASSIGN;
                             value = "=";
@@ -185,7 +185,7 @@ std::vector<Token> worldsAnalyse (std::ifstream &fileRead) {
                     wordList.emplace_back(identity, value);
                 }
             }
-            pointer ++;
+            pointer++;
         }
     }
 //    checkList(wordList);
@@ -197,7 +197,7 @@ void checkList(std::vector<Token> wordList) {
     auto scan = wordList.begin();
     while (scan != wordList.end()) {
         std::cout << scan->toString() << std::endl;
-        scan ++;
+        scan++;
     }
 }
 
@@ -303,10 +303,10 @@ int keyWordAnalyse(char bufferLine[], int pointer, std::string *identity, std::s
 
 int getIDENFR(char bufferLine[], int pointer, std::string *value) {
     const int identBegin = pointer;
-    while ( isAlphaChar(bufferLine[pointer]) ||
-            isNumberChar(bufferLine[pointer]) ||
-            isUnderLine(bufferLine[pointer])) {
-        pointer ++;
+    while (isAlphaChar(bufferLine[pointer]) ||
+           isNumberChar(bufferLine[pointer]) ||
+           isUnderLine(bufferLine[pointer])) {
+        pointer++;
     }
     std::string buf = &bufferLine[identBegin];
     *value = buf.substr(0, pointer - identBegin);
@@ -319,7 +319,7 @@ int getMAIN(char bufferLine[], int pointer) {
         bufferLine[pointer + 2] == 'i' &&
         bufferLine[pointer + 3] == 'n' &&
         !isAlphaChar(bufferLine[pointer + 4]) &&
-        !isNumberChar(bufferLine[pointer + 4])&&
+        !isNumberChar(bufferLine[pointer + 4]) &&
         !isUnderLine(bufferLine[pointer + 4])) {
         pointer += 3;
     }
@@ -333,7 +333,7 @@ int getCONST(char bufferLine[], int pointer) {
         bufferLine[pointer + 3] == 's' &&
         bufferLine[pointer + 4] == 't' &&
         !isAlphaChar(bufferLine[pointer + 5]) &&
-        !isNumberChar(bufferLine[pointer + 5])&&
+        !isNumberChar(bufferLine[pointer + 5]) &&
         !isUnderLine(bufferLine[pointer + 5])) {
         pointer += 4;
     }
@@ -346,7 +346,7 @@ int getVOID(char bufferLine[], int pointer) {
         bufferLine[pointer + 2] == 'i' &&
         bufferLine[pointer + 3] == 'd' &&
         !isAlphaChar(bufferLine[pointer + 4]) &&
-        !isNumberChar(bufferLine[pointer + 4])&&
+        !isNumberChar(bufferLine[pointer + 4]) &&
         !isUnderLine(bufferLine[pointer + 4])) {
         pointer += 3;
     }
@@ -357,7 +357,7 @@ int getIF(char bufferLine[], int pointer) {
     if (bufferLine[pointer] == 'i' &&
         bufferLine[pointer + 1] == 'f' &&
         !isAlphaChar(bufferLine[pointer + 2]) &&
-        !isNumberChar(bufferLine[pointer + 2])&&
+        !isNumberChar(bufferLine[pointer + 2]) &&
         !isUnderLine(bufferLine[pointer + 2])) {
         pointer += 1;
     }
@@ -370,7 +370,7 @@ int getELSE(char bufferLine[], int pointer) {
         bufferLine[pointer + 2] == 's' &&
         bufferLine[pointer + 3] == 'e' &&
         !isAlphaChar(bufferLine[pointer + 4]) &&
-        !isNumberChar(bufferLine[pointer + 4])&&
+        !isNumberChar(bufferLine[pointer + 4]) &&
         !isUnderLine(bufferLine[pointer + 4])) {
         pointer += 3;
     }
@@ -387,7 +387,7 @@ int getCONTINUE(char bufferLine[], int pointer) {
         bufferLine[pointer + 6] == 'u' &&
         bufferLine[pointer + 7] == 'e' &&
         !isAlphaChar(bufferLine[pointer + 8]) &&
-        !isNumberChar(bufferLine[pointer + 8])&&
+        !isNumberChar(bufferLine[pointer + 8]) &&
         !isUnderLine(bufferLine[pointer + 8])) {
         pointer += 7;
     }
@@ -401,7 +401,7 @@ int getWHILE(char bufferLine[], int pointer) {
         bufferLine[pointer + 3] == 'l' &&
         bufferLine[pointer + 4] == 'e' &&
         !isAlphaChar(bufferLine[pointer + 5]) &&
-        !isNumberChar(bufferLine[pointer + 5])&&
+        !isNumberChar(bufferLine[pointer + 5]) &&
         !isUnderLine(bufferLine[pointer + 5])) {
         pointer += 4;
     }
@@ -415,7 +415,7 @@ int getBREAK(char bufferLine[], int pointer) {
         bufferLine[pointer + 3] == 'a' &&
         bufferLine[pointer + 4] == 'k' &&
         !isAlphaChar(bufferLine[pointer + 5]) &&
-        !isNumberChar(bufferLine[pointer + 5])&&
+        !isNumberChar(bufferLine[pointer + 5]) &&
         !isUnderLine(bufferLine[pointer + 5])) {
         pointer += 4;
     }
@@ -430,7 +430,7 @@ int getRETURN(char bufferLine[], int pointer) {
         bufferLine[pointer + 4] == 'r' &&
         bufferLine[pointer + 5] == 'n' &&
         !isAlphaChar(bufferLine[pointer + 6]) &&
-        !isNumberChar(bufferLine[pointer + 6])&&
+        !isNumberChar(bufferLine[pointer + 6]) &&
         !isUnderLine(bufferLine[pointer + 6])) {
         pointer += 5;
     }
@@ -479,23 +479,34 @@ int getINT(char bufferLine[], int pointer) {
     return pointer;
 }
 
-int getFormString(char bufferLine[], int pointer, std::string *value) {
-    const int formStringBegin = pointer - 1;
-    std::string formatString;
-    while (bufferLine[pointer] != '"') {
-        pointer ++;
+//int getFormString(const char bufferLine[], int pointer, std::string *value) {
+std::string getFormString(const char bufferLine[], int *pointer) {
+//    const int formStringBegin = *pointer - 1;
+//    std::string formatString;
+    char buf[1024] = "";
+    int index = 0;
+    buf[index++] = bufferLine[*pointer];
+    (*pointer)++;
+    while (bufferLine[*pointer] != '"') {
+        buf[index++] = bufferLine[*pointer];
+        (*pointer)++;
     }
-    formatString = &bufferLine[formStringBegin];
-    formatString = formatString.substr(0, pointer - formStringBegin + 1);
-    *value = formatString;
-    return pointer;
+    buf[index++] = bufferLine[*pointer];
+    buf[index] = '\0';
+    (*pointer)++;
+    std::string str(buf);
+//    formatString = &bufferLine[formStringBegin];
+//    formatString = formatString.substr(0, pointer - formStringBegin + 1);
+//    *value = formatString;
+//    *value = buf;
+    return str;
 }
 
 int getConstInteger(char bufferLine[], int pointer, std::string *value) {
     const int constIntegerBegin = pointer;
     std::string constInteger;
     while (isNumberChar(bufferLine[pointer])) {
-        pointer ++;
+        pointer++;
     }
     constInteger = &bufferLine[constIntegerBegin];
     constInteger = constInteger.substr(0, pointer - constIntegerBegin);
@@ -503,20 +514,20 @@ int getConstInteger(char bufferLine[], int pointer, std::string *value) {
     return pointer - 1;
 }
 
-bool isNumberChar (char c) {
-    if (c >= '0' && c<= '9') {
+bool isNumberChar(char c) {
+    if (c >= '0' && c <= '9') {
         return true;
     }
     return false;
 }
 
-bool isAlphaChar (char c) {
+bool isAlphaChar(char c) {
     if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
         return true;
     }
     return false;
 }
 
-bool isUnderLine (char c) {
+bool isUnderLine(char c) {
     return c == '_';
 }

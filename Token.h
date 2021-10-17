@@ -54,8 +54,8 @@ public:
     std::string identity;
     std::string value;
 public:
-    Token(std::string name, std::string valueIn);
-    Token(std::string name);
+    Token(std::string &name, const std::string &valueIn);
+    Token(std::string &name);
     std::string toString();
     std::string getIdentity();
     ~Token();

@@ -4,18 +4,21 @@
 
 
 #include "Token.h"
-Token::Token(std::string name, std::string valueIn) {
-    identity = name;
-    value = valueIn;
+
+#include <utility>
+Token::Token(std::string &name, const std::string &valueIn) {
+    this->identity = std::move(name);
+    this->value = valueIn;
+
 }
 
-Token::Token(std::string name) {
-    identity = name;
-    value = "";
+Token::Token(std::string &name) {
+    this->identity = std::move(name);
+    this->value = "";
 }
 
 std::string Token::toString() {
-    return identity + " " + value;
+    return this->identity + " " + this->value;
 }
 
 std::string Token::getIdentity() {
