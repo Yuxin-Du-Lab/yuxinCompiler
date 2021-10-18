@@ -27,7 +27,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class Number {
@@ -37,14 +37,14 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class PrimaryExp {
 public:
     virtual void print(int tab) {};
 
-//    virtual // std::string toString(); { return "base"; };
+    virtual std::string toSysY() { return "base"; };
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -54,7 +54,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -64,7 +64,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -74,14 +74,12 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class UnaryExp {
 public:
     virtual void print(int tab) {};
-
-//    virtual // std::string toString(); { return "base"; };
 };
 
 class PrimaryUnaryExp : public UnaryExp {
@@ -91,7 +89,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class FuncUnaryExp : public UnaryExp {
@@ -104,7 +102,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -117,7 +115,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class MulOpTree {
@@ -136,7 +134,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class MulExp {
@@ -146,7 +144,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class AddOpTree {
@@ -165,7 +163,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class AddExp {
@@ -175,7 +173,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class RelOpTree {
@@ -194,7 +192,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class RelExp {
@@ -204,7 +202,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class EqOpTree {
@@ -223,7 +221,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class EqExp {
@@ -233,7 +231,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class LAndExp {
@@ -243,7 +241,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class LOrExp {
@@ -253,7 +251,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class Cond {
@@ -263,7 +261,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class LVal {
@@ -279,7 +277,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class Exp {
@@ -289,7 +287,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 
@@ -306,7 +304,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class ConstExp {
@@ -318,7 +316,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class VarDef {
@@ -340,7 +338,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 
@@ -350,8 +348,6 @@ public:
     void addVarDef(VarDef *varDef);
 
     void print(int tab);
-
-    // std::string toString();;
 };
 
 class ConstInitVal {
@@ -366,8 +362,6 @@ public:
     void addConstInitVal(ConstInitVal *constInitVal);
 
     void print(int tab);
-
-    // std::string toString();;
 };
 
 class ConstDef {
@@ -385,8 +379,6 @@ public:
     void setConstInitVal(ConstInitVal *constInitVal);
 
     void print(int tab);
-
-    // std::string toString();;
 };
 
 class ConstDecl {
@@ -396,7 +388,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class Block {
@@ -411,15 +403,11 @@ public:
     void addStmt(Stmt *stmt);
 
     void print(int tab);
-
-    // std::string toString();;
 };
 
 class Stmt {
 public:
     virtual void print(int tab) {};
-
-//    virtual // std::string toString(); { return "base"; };
 };
 
 class LValStmt : public Stmt {
@@ -431,8 +419,6 @@ public:
     void setExp(Exp *exp);
 
     void print(int tab) override;
-
-    // std::string toString();;
 };
 
 class ExpStmt : public Stmt {
@@ -442,7 +428,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class BlockStmt : public Stmt {
@@ -452,7 +438,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class IfStmt : public Stmt {
@@ -468,7 +454,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class WhileStmt : public Stmt {
@@ -481,7 +467,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class LoopStmt : public Stmt {
@@ -491,7 +477,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class ReturnStmt : public Stmt {
@@ -501,7 +487,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class GetintStmt : public Stmt {
@@ -511,7 +497,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class PrintfStmt : public Stmt {
@@ -524,7 +510,7 @@ public:
 
     void print(int tab) override;
 
-    // std::string toString();;
+
 };
 
 class FuncFParam {
@@ -540,7 +526,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class FuncFParams {
@@ -550,7 +536,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class FuncType {
@@ -560,7 +546,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 //TODO
@@ -571,7 +557,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class FuncDef {
@@ -590,7 +576,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 
@@ -601,7 +587,7 @@ public:
 
     void print(int tab);
 
-    // std::string toString();;
+
 };
 
 class CompUnit {
@@ -621,7 +607,7 @@ public:
 
     void print();
 
-    // std::string toString();;
+
 };
 
 #endif //COMPILER_ASTBUILDER_H
