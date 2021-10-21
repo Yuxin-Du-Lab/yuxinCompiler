@@ -8,7 +8,8 @@
 #include <fstream>
 #include "iostream"
 #include "vector"
-#include "Token.h"
+#include "../token/Token.h"
+#include "../symbolTable/symbol.h"
 
 class Stmt;
 
@@ -338,7 +339,13 @@ public:
 
     void print(int tab);
 
+    Token *getIdent() {
+        return this->ident;
+    }
 
+    int getRow() {
+        return this->row;
+    }
 };
 
 
@@ -379,6 +386,14 @@ public:
     void setConstInitVal(ConstInitVal *constInitVal);
 
     void print(int tab);
+
+    Token *getIdent() {
+        return this->ident;
+    }
+
+    int getRow() {
+        return this->row;
+    }
 };
 
 class ConstDecl {
@@ -526,7 +541,13 @@ public:
 
     void print(int tab);
 
+    Token *getIdent() {
+        return ident;
+    }
 
+    int getRow() {
+        return this->row;
+    }
 };
 
 class FuncFParams {
@@ -536,7 +557,9 @@ public:
 
     void print(int tab);
 
-
+    std::vector<FuncFParam *> getFParams() {
+        return this->funcFParams;
+    }
 };
 
 class FuncType {
@@ -546,7 +569,9 @@ public:
 
     void print(int tab);
 
-
+    bool isVoid() {
+        return this->funcType->getIdentity() == VOIDTK;
+    }
 };
 
 //TODO
@@ -576,7 +601,21 @@ public:
 
     void print(int tab);
 
-
+    std::vector<Item*> getFParamsAsItem() {
+        std::vector<FuncFParam*> funcFParams = this->funcFParams->getFParams();
+        std::vector<Item*> paramsAsItem;
+        for (auto iter : funcFParams) {
+            if (iter->getRow() > 0) {
+//                TODO row num
+                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow());
+                paramsAsItem.emplace_back(arrayItem);
+            } else {
+                auto *varItem = new VarItem(iter->getIdent(), false);
+                paramsAsItem.emplace_back(varItem);
+            }
+        }
+        return paramsAsItem;
+    }
 };
 
 

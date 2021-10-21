@@ -1,6 +1,6 @@
-#include "lexer.h"
+#include "lexer/lexer.h"
 #include "vector"
-#include "syntax.h"
+#include "syntax/syntax.h"
 
 void writeFile4WordList(std::vector<Token> wordList) {
     std::ofstream writeLexerFile("outputWordList.txt");
@@ -16,7 +16,7 @@ int main() {
     std::ifstream readLexerFile("testfile.txt");
 //    std::ofstream writeLexerFile("output.txt");
     std::vector<Token> wordList = worldsAnalyse(readLexerFile);
-    writeFile4WordList(wordList);
+//    writeFile4WordList(wordList);
     syntaxAnalysis(wordList);
     return 0;
 }

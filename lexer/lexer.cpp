@@ -3,7 +3,8 @@
 //
 
 #include "lexer.h"
-#include "Token.h"
+
+int line = 0;
 
 std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
     char bufferLine[LINELENGTH];
@@ -17,6 +18,7 @@ std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
     bool invalid = false;
     while (!fileRead.eof()) {
         fileRead.getline(bufferLine, LINELENGTH);
+        line++;
 //        std::cout << ">>>get line : " << bufferLine << std::endl;
         pointer = 0;
 //      analyse:
@@ -180,9 +182,9 @@ std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
             }
             if (identity != SKIP) {
                 if (value.empty()) {
-                    wordList.emplace_back(identity);
+                    wordList.emplace_back(identity, line);
                 } else {
-                    wordList.emplace_back(identity, value);
+                    wordList.emplace_back(identity, value, line);
                 }
             }
             pointer++;

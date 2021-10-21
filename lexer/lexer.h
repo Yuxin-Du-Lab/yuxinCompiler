@@ -8,7 +8,7 @@
 #include <fstream>
 #include "vector"
 #include <cstring>
-#include "Token.h"
+#include "../token/Token.h"
 const int LINELENGTH = 1024 * 1024;
 
 // func claims

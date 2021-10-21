@@ -5,9 +5,9 @@
 #ifndef COMPILER_SYNTAX_H
 #define COMPILER_SYNTAX_H
 
-#include "Token.h"
+#include "../token/Token.h"
 #include "vector"
-#include "ASTBuilder.h"
+#include "../AST/ASTBuilder.h"
 
 
 void syntaxAnalysis(std::vector<Token> &wordList);
@@ -30,7 +30,7 @@ ConstInitVal *getConstInitVal(std::vector<Token> &wordList, int *pointer);
 
 VarDecl *getVarDecl(std::vector<Token> &wordList, int *pointer);
 
-Stmt *getStmt(std::vector<Token> &wordList, int *pointer);
+Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop = false);
 
 LVal *getLVal(std::vector<Token> &wordList, int *pointer, bool scanning = false);
 

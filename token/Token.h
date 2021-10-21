@@ -53,11 +53,13 @@ class Token {
 public:
     std::string identity;
     std::string value;
+    int line;
 public:
-    Token(std::string &name, const std::string &valueIn);
-    Token(std::string &name);
+    Token(std::string &name, const std::string &valueIn, int lineNum = -1);
+    Token(std::string &name, int lineNum = -1);
     std::string toString();
     std::string getIdentity();
+    int getLine();
     ~Token();
 };
 #endif //COMPILER_TOKEN_H
