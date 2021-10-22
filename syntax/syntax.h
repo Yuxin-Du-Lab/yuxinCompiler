@@ -20,7 +20,7 @@ CompUnit *getCompUnit(std::vector<Token> &wordList, int *pointer);
 
 MainFuncDef *getMainFuncDef(std::vector<Token> &wordList, int *pointer);
 
-Block *getBlock(std::vector<Token> &wordList, int *pointer);
+Block *getBlock(std::vector<Token> &wordList, int *pointer, bool isLoop = false);
 
 ConstDecl *getConstDecl(std::vector<Token> &wordList, int *pointer);
 

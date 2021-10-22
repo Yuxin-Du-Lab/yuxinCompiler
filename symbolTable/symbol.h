@@ -124,23 +124,23 @@ public:
         return this->params;
     }
 
-    void setFParam() {
-        if (astItem == nullptr) {
-            std::cout << "Not assign FuncItem's AST item" << std::endl;
-            return;
-        }
-        auto *funDef = (FuncDef *)this->astItem;
-        std::vector<FuncFParam *> funcFParams = funDef->getFParams();
-        for (auto iter : funcFParams) {
-            if (iter->getRow() > 0) {
-                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow(), iter);
-                this->params.emplace_back(arrayItem);
-            } else {
-                auto *varItem = new VarItem(iter->getIdent(), false, iter);
-                this->params.emplace_back(varItem);
-            }
-        }
-    }
+//    void setFParam() {
+//        if (astItem == nullptr) {
+//            std::cout << "Not assign FuncItem's AST item" << std::endl;
+//            return;
+//        }
+//        auto *funDef = (FuncDef *)this->astItem;
+//        std::vector<FuncFParam *> funcFParams = funDef->getFParams();
+//        for (auto iter : funcFParams) {
+//            if (iter->getRow() > 0) {
+//                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow(), iter);
+//                this->params.emplace_back(arrayItem);
+//            } else {
+//                auto *varItem = new VarItem(iter->getIdent(), false, iter);
+//                this->params.emplace_back(varItem);
+//            }
+//        }
+//    }
 
     void print() override {
         std::cout << "Func Item" << std::endl;

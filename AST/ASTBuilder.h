@@ -9,6 +9,7 @@
 #include "iostream"
 #include "vector"
 #include "../token/Token.h"
+
 class AstItem {
 
 };
@@ -29,8 +30,6 @@ public:
     void setUnaryOp(Token *token);
 
     void print(int tab);
-
-
 };
 
 class Number : public AstItem {
@@ -46,8 +45,6 @@ public:
 class PrimaryExp : public AstItem {
 public:
     virtual void print(int tab) {};
-
-    virtual std::string toSysY() { return "base"; };
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -56,8 +53,6 @@ public:
     void setPrimaryExp(Exp *exp);
 
     void print(int tab) override;
-
-
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -66,8 +61,6 @@ public:
     void setPrimaryLVal(LVal *lVal);
 
     void print(int tab) override;
-
-
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -91,8 +84,6 @@ public:
     void setPrimaryExp(PrimaryExp *primaryExp);
 
     void print(int tab) override;
-
-
 };
 
 class FuncUnaryExp : public UnaryExp {
@@ -123,8 +114,6 @@ public:
     void setUnaryExp(UnaryExp *unaryExp);
 
     void print(int tab) override;
-
-
 };
 
 class MulOpTree : public AstItem {
@@ -143,7 +132,9 @@ public:
 
     void print(int tab);
 
-
+    bool getIsLeaf() {
+        return isLeaf;
+    }
 };
 
 class MulExp : public AstItem {
@@ -152,8 +143,6 @@ public:
     void setRoot(MulOpTree *root);
 
     void print(int tab);
-
-
 };
 
 class AddOpTree : public AstItem {
@@ -172,7 +161,9 @@ public:
 
     void print(int tab);
 
-
+    bool getIsLeaf() {
+        return isLeaf;
+    }
 };
 
 class AddExp : public AstItem {
@@ -181,8 +172,6 @@ public:
     void setRoot(AddOpTree *root);
 
     void print(int tab);
-
-
 };
 
 class RelOpTree : public AstItem {
@@ -200,8 +189,6 @@ public:
     void setLeafValue(AddExp *addExp);
 
     void print(int tab);
-
-
 };
 
 class RelExp : public AstItem {
@@ -297,8 +284,6 @@ public:
     void setAddExp(AddExp *addExp);
 
     void print(int tab);
-
-
 };
 
 
@@ -535,7 +520,31 @@ public:
 
     void print(int tab) override;
 
+    int getFormatNum() {
+        int num = 0;
+        for (int i = 0; i < formatString->getKey().size(); i++) {
+            if (formatString->getKey()[i] == '%' && formatString->getKey()[i + 1] == 'd') {
+                num++;
+                i++;
+            }
+        }
+        return num;
+    }
 
+    bool illegalFormatString() {
+        for (int index=1; index<formatString->getKey().size() - 1; index++) {
+            char c = formatString->getKey()[index];
+            if (c == '%' && formatString->getKey()[index+1] == 'd') {
+                index ++;
+                continue;
+            } else if ( c == 32 || c == 33 || c >=40 && c <= 126) {
+                continue;
+            } else {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 class FuncFParam : public AstItem {
@@ -653,7 +662,6 @@ public:
     void setMainFuncDef(MainFuncDef *mainFuncDef);
 
     void print();
-
 
 };
 
