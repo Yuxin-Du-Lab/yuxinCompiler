@@ -108,6 +108,10 @@ public:
     Token *getIdent() {
         return this->ident;
     }
+
+    FuncRParams *getFuncRParams() {
+        return this->funcRParams;
+    }
 };
 
 class UnaryUnaryExp : public UnaryExp {

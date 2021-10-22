@@ -9,10 +9,18 @@
 #include "../token/Token.h"
 #include "unordered_map"
 #include "../AST/ASTBuilder.h"
+#include "../error/errorHandler.h"
 
 #define FUNC_SCOPE "FUNC_SCOPE SCOPE"
 #define BLOCK_SCOPE "BLOCK_SCOPE SCOPE"
 #define MACRO_SCOPE "COMP UNIT SCOPE"
+
+#define ITEM "ITEM"
+#define ARRAY_ITEM_D1 "ARRAY_ITEM_D1"
+#define ARRAY_ITEM_D2 "ARRAY_ITEM_D2"
+#define FUNC_ITEM "FUNC_ITEM"
+#define VAR_ITEM "VAR_ITEM"
+
 // interface of ast
 
 
@@ -44,6 +52,10 @@ public:
     int getLine() {
         return this->token->getLine();
     }
+
+    virtual std::string getType() {
+        return ITEM;
+    }
 };
 
 class VarItem : public Item {
@@ -58,6 +70,14 @@ public:
         std::cout << "Var Item" << std::endl;
         std::cout << this->token->toString() << std::endl;
         std::cout << "is const: " << this->isConst << std::endl;
+    }
+
+    std::string getType() override {
+        return VAR_ITEM;
+    }
+
+    bool getIsConst() {
+        return this->isConst;
     }
 };
 
@@ -80,6 +100,12 @@ public:
         std::cout << "Row1: " << this->row1 << std::endl;
         std::cout << "Row2: " << this->row2 << std::endl;
     }
+
+    std::string getType() override {
+        return dimension == 1 ? ARRAY_ITEM_D1 :
+                dimension == 2 ? ARRAY_ITEM_D2 :
+                VAR_ITEM;
+    }
 };
 
 class FuncItem : public Item {
@@ -92,6 +118,10 @@ public:
 
     int getFParamNum() {
         return this->params.size();
+    }
+
+    std::vector<Item *> getParamsAsItem() {
+        return this->params;
     }
 
     void setFParam() {
@@ -122,19 +152,46 @@ public:
         }
         std::cout << "Params End " << std::endl;
     }
+
+    bool typeMatch(std::vector<Item *> RParams) {
+        if (RParams.size() != params.size()) {
+            std::cout << "Param Num need Match First!" << std::endl;
+            return false;
+        }
+        for (int index=0; index < RParams.size() && index <params.size(); index++) {
+            auto *param1 = (VarItem *)RParams[index];
+            auto *param2 = (VarItem *)this->params[index];
+            if (param1->getType() != param2->getType() || param1->getIsConst() != param2->getIsConst()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    std::string getType() override {
+        return FUNC_ITEM;
+    }
 };
 
 class Scope {
+    bool shouldHasReturn;
+    bool returned;
     std::string type;
     std::unordered_map<std::string, Item *> table;
 public:
-    Scope(std::string type) {
+    Scope(std::string type, bool shouldHasReturn = false) {
         this->type = type;
+        this->shouldHasReturn = shouldHasReturn;
+        this->returned = false;
     }
 
     void addItem(Item *item) {
         item->print();
         table.emplace(item->getKey(), item);
+    }
+
+    void setReturned() {
+        this->returned = true;
     }
 
     bool exist(const std::string &key) {
@@ -153,6 +210,14 @@ public:
 
     std::string getType() {
         return this->type;
+    }
+
+    bool getShouldHasReturn() {
+        return this->shouldHasReturn;
+    }
+
+    bool getReturned() {
+        return this->returned;
     }
 };
 
@@ -196,6 +261,32 @@ public:
 
     Scope *getRecentScope() {
         return this->scopeStack.back();
+    }
+
+    bool isIdentConst(Token* token) {
+        Item *item = findItem(token->getKey());
+        if (item != nullptr) {
+            return ((VarItem *)item)->getIsConst();
+        }
+        return false;
+    }
+
+    bool isRecentFuncScopeShouldHasReturn() {
+        for (int iter = scopeStack.size() - 1; iter >=0; iter--) {
+            if (scopeStack[iter]->getType() == FUNC_SCOPE) {
+                return scopeStack[iter]->getShouldHasReturn();
+            }
+        }
+        return false;
+    }
+
+    void setRecentFuncScopeReturned() {
+        for (int iter = scopeStack.size() - 1; iter >=0; iter--) {
+            if (scopeStack[iter]->getType() == FUNC_SCOPE) {
+                scopeStack[iter]->setReturned();
+                break;
+            }
+        }
     }
 };
 

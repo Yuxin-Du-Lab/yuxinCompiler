@@ -6,6 +6,7 @@
 #include "iostream"
 #include "../error/errorHandler.h"
 #include "../symbolTable/symbol.h"
+
 SymbolTable symbolTable;
 
 std::ofstream writeSyntaxFile("output.txt");
@@ -83,9 +84,8 @@ MainFuncDef *getMainFuncDef(std::vector<Token> &wordList, int *pointer) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
     }
-    Scope *mainFuncScope = new Scope(FUNC_SCOPE);
+    Scope *mainFuncScope = new Scope(FUNC_SCOPE, true);
     symbolTable.pushScope(mainFuncScope);
-
     // get (
     if (wordList[(*pointer)].getIdentity() == LPARENT) {
         writeFile4syntax(wordList[(*pointer)]);
@@ -96,11 +96,17 @@ MainFuncDef *getMainFuncDef(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].getIdentity() == RPARENT) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+    } else {
+        throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
     }
 
     //  get Block
     auto *block = getBlock(wordList, pointer);
     mainFuncDefptr->setBlock(block);
+
+    if (mainFuncScope->getShouldHasReturn() && !mainFuncScope->getReturned()) {
+        throwError(FuncReturnNeed, wordList[(*pointer) - 1].getLine());
+    }
 
     symbolTable.popScope();
     writeFile4syntax("MainFuncDef");
@@ -154,6 +160,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (wordList[(*pointer)].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
+            } else {
+                throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
             }
             auto *ifStmt = getStmt(wordList, pointer);
             ((IfStmt *) stmtptr)->setIfStmt(ifStmt);
@@ -178,9 +186,11 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (wordList[(*pointer)].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
-                auto *whileStmt = getStmt(wordList, pointer, true);
-                ((WhileStmt *) stmtptr)->setWhileStmt(whileStmt);
+            } else {
+                throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
             }
+            auto *whileStmt = getStmt(wordList, pointer, true);
+            ((WhileStmt *) stmtptr)->setWhileStmt(whileStmt);
         }
     } else if (wordList[(*pointer)].getIdentity() == BREAKTK) {
 //        break
@@ -191,6 +201,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
         if (wordList[(*pointer)].getIdentity() == SEMICN) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
         }
     } else if (wordList[(*pointer)].getIdentity() == CONTINUETK) {
 //        continue
@@ -201,6 +213,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
         if (wordList[(*pointer)].getIdentity() == SEMICN) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
         }
     } else if (wordList[(*pointer)].getIdentity() == PRINTFTK) {
         writeFile4syntax(wordList[(*pointer)]);
@@ -226,14 +240,19 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (wordList[(*pointer)].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
-                if (wordList[(*pointer)].getIdentity() == SEMICN) {
-                    writeFile4syntax(wordList[(*pointer)]);
-                    (*pointer)++;
-                }
+            } else {
+                throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
+            }
+            if (wordList[(*pointer)].getIdentity() == SEMICN) {
+                writeFile4syntax(wordList[(*pointer)]);
+                (*pointer)++;
+            } else {
+                throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
             }
         }
     } else if (wordList[(*pointer)].getIdentity() == RETURNTK) {
 //        return
+        Token *returnTK = &wordList[(*pointer)];
         stmtptr = new ReturnStmt();
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
@@ -242,12 +261,20 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             (*pointer)++;
         } else {
 //            getExp
+            if (!symbolTable.isRecentFuncScopeShouldHasReturn()) {
+                throwError(FuncShouldNotHaveReturn, returnTK->getLine());
+            }
             auto *returnExp = getExp(wordList, pointer);
             ((ReturnStmt *) stmtptr)->setReturnExp(returnExp);
             if (wordList[(*pointer)].getIdentity() == SEMICN) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
+            } else {
+                throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
             }
+        }
+        if (symbolTable.isRecentFuncScopeShouldHasReturn()) {
+            symbolTable.setRecentFuncScopeReturned();
         }
     } else if (wordList[(*pointer)].getIdentity() == LBRACE) {
 //        Block
@@ -291,6 +318,9 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (!symbolTable.exist(lVal->getIdent()->getKey())) {
                 throwError(UndefinedName, lVal->getIdent()->getLine());
             }
+            if (symbolTable.isIdentConst(lVal->getIdent())) {
+                throwError(ConstCannotBeREAssign, lVal->getIdent()->getLine());
+            }
             if (wordList[(*pointer)].getIdentity() == ASSIGN) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
@@ -303,14 +333,18 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
                     if (wordList[(*pointer)].getIdentity() == LPARENT) {
                         writeFile4syntax(wordList[(*pointer)]);
                         (*pointer)++;
-                        if (wordList[(*pointer)].getIdentity() == RPARENT) {
-                            writeFile4syntax(wordList[(*pointer)]);
-                            (*pointer)++;
-                            if (wordList[(*pointer)].getIdentity() == SEMICN) {
-                                writeFile4syntax(wordList[(*pointer)]);
-                                (*pointer)++;
-                            }
-                        }
+                    }
+                    if (wordList[(*pointer)].getIdentity() == RPARENT) {
+                        writeFile4syntax(wordList[(*pointer)]);
+                        (*pointer)++;
+                    } else {
+                        throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
+                    }
+                    if (wordList[(*pointer)].getIdentity() == SEMICN) {
+                        writeFile4syntax(wordList[(*pointer)]);
+                        (*pointer)++;
+                    } else {
+                        throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
                     }
                 } else {
 //                    LVal = Exp
@@ -321,6 +355,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
                     if (wordList[(*pointer)].getIdentity() == SEMICN) {
                         writeFile4syntax(wordList[(*pointer)]);
                         (*pointer)++;
+                    } else {
+                        throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
                     }
                 }
             }
@@ -333,6 +369,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (wordList[*pointer].getIdentity() == SEMICN) {
                 writeFile4syntax(wordList[*pointer]);
                 (*pointer)++;
+            } else {
+                throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
             }
         }
     } else {
@@ -343,6 +381,8 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
         if (wordList[*pointer].getIdentity() == SEMICN) {
             writeFile4syntax(wordList[*pointer]);
             (*pointer)++;
+        } else {
+            throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     writeFile4syntax("Stmt");
@@ -365,6 +405,9 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
             symbolTable.getRecentScope()->addItem(funcItem);
         }
         (*pointer)++;
+        Scope *funcScope = new Scope(FUNC_SCOPE, !funcType->isVoid());
+        symbolTable.pushScope(funcScope);
+
         if (wordList[*pointer].getIdentity() == LPARENT) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
@@ -374,16 +417,19 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
 //              set params for func scope
                 funcItem->setFParam();
             }
-            Scope *funcScope = new Scope(FUNC_SCOPE);
-            symbolTable.pushScope(funcScope);
             if (wordList[*pointer].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
                 auto *funcBlock = getBlock(wordList, pointer);
                 funcDefptr->setFuncBlock(funcBlock);
+            } else {
+                throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
             }
-            symbolTable.popScope();
         }
+        if (funcScope->getShouldHasReturn() && !funcScope->getReturned()) {
+            throwError(FuncReturnNeed, wordList[(*pointer) - 1].getLine());
+        }
+        symbolTable.popScope();
     }
     writeFile4syntax("FuncDef");
     return funcDefptr;
@@ -434,20 +480,32 @@ FuncFParam *getFuncFParam(std::vector<Token> &wordList, int *pointer) {
         if (wordList[*pointer].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
-        if (wordList[*pointer].getIdentity() == LBRACK) {
-            row++;
+    }
+    if (wordList[*pointer].getIdentity() == LBRACK) {
+        row++;
+        writeFile4syntax(wordList[(*pointer)]);
+        (*pointer)++;
+        auto *constExpRow = getConstExp(wordList, pointer);
+        funcFParamptr->setConstExp(constExpRow);
+        if (wordList[*pointer].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
-            auto *constExpRow = getConstExp(wordList, pointer);
-            funcFParamptr->setConstExp(constExpRow);
-            if (wordList[*pointer].getIdentity() == RBRACK) {
-                writeFile4syntax(wordList[(*pointer)]);
-                (*pointer)++;
-            }
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     funcFParamptr->setRow(row);
+    auto *varItem = row > 0 ?
+                    new ArrayItem(funcFParamptr->getIdent(), false, row, funcFParamptr) :
+                    new VarItem(funcFParamptr->getIdent(), false, funcFParamptr);
+    if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
+        throwError(NameRedefinition, varItem->getLine());
+    } else {
+        symbolTable.getRecentScope()->addItem(varItem);
+    }
     writeFile4syntax("FuncFParam");
     return funcFParamptr;
 }
@@ -489,17 +547,23 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
                 if (wordList[*pointer].getIdentity() != RPARENT) {
                     auto *funcRParams = getFuncRParams(wordList, pointer, scanning);
                     ((FuncUnaryExp *) unaryExpptr)->setFuncRParams(funcRParams);
-                    if (symbolTable.exist(key)) {
+                }
+                if (symbolTable.exist(key)) {
 //                        exit func
-                        if (funcRParams->getRParamNum() != ((FuncItem *)symbolTable.findItem(key))->getFParamNum()) {
-                            throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
-                        }
+                    // check params F & R num match
+                    auto *funcItem = (FuncItem *) symbolTable.findItem(key);
+                    if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams() == nullptr && funcItem->getFParamNum() > 0) {
+                        throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                    } else if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams()->getRParamNum() !=
+                               funcItem->getFParamNum()) {
+                        throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
                     }
-
                 }
                 if (wordList[*pointer].getIdentity() == RPARENT) {
                     writeFile4syntax(wordList[(*pointer)], scanning);
                     (*pointer)++;
+                } else {
+                    throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
                 }
             }
         } else {
@@ -559,6 +623,8 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
         if (wordList[*pointer].getIdentity() == RPARENT) {
             writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
+        } else {
+            throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
         }
     } else if (wordList[*pointer].getIdentity() == IDENFR) {
 //        lVal
@@ -566,6 +632,9 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
         auto *lVal = getLVal(wordList, pointer, scanning);
         if (!symbolTable.exist(lVal->getIdent()->getKey())) {
             throwError(UndefinedName, lVal->getIdent()->getLine());
+        }
+        if (symbolTable.isIdentConst(lVal->getIdent())) {
+            throwError(ConstCannotBeREAssign, lVal->getIdent()->getLine());
         }
         ((LValPrimaryExp *) primaryExpptr)->setPrimaryLVal(lVal);
     } else if (wordList[*pointer].getIdentity() == INTCON) {
@@ -798,6 +867,8 @@ LVal *getLVal(std::vector<Token> &wordList, int *pointer, bool scanning) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
@@ -810,6 +881,8 @@ LVal *getLVal(std::vector<Token> &wordList, int *pointer, bool scanning) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     lValptr->setRow(row);
@@ -859,6 +932,8 @@ ConstDecl *getConstDecl(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].getIdentity() == SEMICN) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+    } else {
+        throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
     }
     writeFile4syntax("ConstDecl");
     return constDeclptr;
@@ -881,6 +956,8 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
@@ -892,6 +969,8 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     if (wordList[(*pointer)].getIdentity() == ASSIGN) {
@@ -950,8 +1029,8 @@ VarDecl *getVarDecl(std::vector<Token> &wordList, int *pointer) {
 
 //    var define
     auto *varItem = varDef->getRow() > 0 ?
-              new ArrayItem(varDef->getIdent(), false, varDef->getRow(), varDef) :
-              new VarItem(varDef->getIdent(), false, varDef);
+                    new ArrayItem(varDef->getIdent(), false, varDef->getRow(), varDef) :
+                    new VarItem(varDef->getIdent(), false, varDef);
     if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
         throwError(NameRedefinition, varItem->getLine());
     } else {
@@ -976,6 +1055,8 @@ VarDecl *getVarDecl(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].getIdentity() == SEMICN) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+    } else {
+        throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
     }
     writeFile4syntax("VarDecl");
     return varDeclptr;
@@ -999,6 +1080,8 @@ VarDef *getVarDef(std::vector<Token> &wordList, int *pointer) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     if (wordList[(*pointer)].identity == LBRACK) {
@@ -1010,6 +1093,8 @@ VarDef *getVarDef(std::vector<Token> &wordList, int *pointer) {
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
+        } else {
+            throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
     if (wordList[(*pointer)].getIdentity() == ASSIGN) {
