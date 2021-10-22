@@ -27,6 +27,10 @@ std::string Token::getIdentity() {
     return identity;
 }
 
+std::string Token::getKey() {
+    return value;
+}
+
 int Token::getLine() {
     return this->line;
 }

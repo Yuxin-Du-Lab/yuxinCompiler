@@ -9,7 +9,9 @@
 #include "iostream"
 #include "vector"
 #include "../token/Token.h"
-#include "../symbolTable/symbol.h"
+class AstItem {
+
+};
 
 class Stmt;
 
@@ -19,7 +21,7 @@ class FuncRParams;
 
 class LVal;
 
-class UnaryOp {
+class UnaryOp : public AstItem {
     Token *op;   // + - !
 //    ! only can exist in cond
 // TODO
@@ -31,7 +33,7 @@ public:
 
 };
 
-class Number {
+class Number : public AstItem {
     Token *intConst;
 public:
     void setIntConst(Token *token);
@@ -41,7 +43,7 @@ public:
 
 };
 
-class PrimaryExp {
+class PrimaryExp : public AstItem {
 public:
     virtual void print(int tab) {};
 
@@ -78,7 +80,7 @@ public:
 
 };
 
-class UnaryExp {
+class UnaryExp : public AstItem {
 public:
     virtual void print(int tab) {};
 };
@@ -103,7 +105,9 @@ public:
 
     void print(int tab) override;
 
-
+    Token *getIdent() {
+        return this->ident;
+    }
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -119,7 +123,7 @@ public:
 
 };
 
-class MulOpTree {
+class MulOpTree : public AstItem {
     bool isLeaf;
     Token *op;
     MulOpTree *branch[2];
@@ -138,7 +142,7 @@ public:
 
 };
 
-class MulExp {
+class MulExp : public AstItem {
     MulOpTree *root;
 public:
     void setRoot(MulOpTree *root);
@@ -148,7 +152,7 @@ public:
 
 };
 
-class AddOpTree {
+class AddOpTree : public AstItem {
     bool isLeaf;
     Token *op;
     AddOpTree *branch[2];
@@ -167,7 +171,7 @@ public:
 
 };
 
-class AddExp {
+class AddExp : public AstItem {
     AddOpTree *root;
 public:
     void setRoot(AddOpTree *root);
@@ -177,7 +181,7 @@ public:
 
 };
 
-class RelOpTree {
+class RelOpTree : public AstItem {
     bool isLeaf;
     Token *op;
     RelOpTree *branch[2];
@@ -196,7 +200,7 @@ public:
 
 };
 
-class RelExp {
+class RelExp : public AstItem {
     RelOpTree *root;
 public:
     void setRoot(RelOpTree *root);
@@ -206,7 +210,7 @@ public:
 
 };
 
-class EqOpTree {
+class EqOpTree : public AstItem {
     bool isLeaf;
     Token *op;
     EqOpTree *branch[2];
@@ -225,7 +229,7 @@ public:
 
 };
 
-class EqExp {
+class EqExp : public AstItem {
     EqOpTree *root;
 public:
     void setEqExpRoot(EqOpTree *root);
@@ -235,7 +239,7 @@ public:
 
 };
 
-class LAndExp {
+class LAndExp : public AstItem {
     std::vector<EqExp *> eqExps;
 public:
     void addEqExp(EqExp *eqExp);
@@ -245,7 +249,7 @@ public:
 
 };
 
-class LOrExp {
+class LOrExp : public AstItem {
     std::vector<LAndExp *> lAndExps;
 public:
     void addLAndExp(LAndExp *lAndExp);
@@ -255,7 +259,7 @@ public:
 
 };
 
-class Cond {
+class Cond : public AstItem {
     LOrExp *lOrExp;
 public:
     void setLOrExp(LOrExp *lOrExp);
@@ -265,7 +269,7 @@ public:
 
 };
 
-class LVal {
+class LVal : public AstItem {
     Token *ident;
     int row;
     Exp *exps[2];
@@ -278,10 +282,12 @@ public:
 
     void print(int tab);
 
-
+    Token *getIdent() {
+        return this->ident;
+    }
 };
 
-class Exp {
+class Exp : public AstItem {
     AddExp *addExp;
 public:
     void setAddExp(AddExp *addExp);
@@ -292,7 +298,7 @@ public:
 };
 
 
-class InitVal {
+class InitVal : public AstItem {
     Exp *exp;
     int row;
     std::vector<InitVal *> initVals;
@@ -308,7 +314,7 @@ public:
 
 };
 
-class ConstExp {
+class ConstExp : public AstItem {
     AddExp *addExp;
 //    ident used must be const HOW TO DO?
 // TODO
@@ -320,7 +326,7 @@ public:
 
 };
 
-class VarDef {
+class VarDef : public AstItem {
     Token *ident;
     int row;
     ConstExp *constExps[2];
@@ -349,7 +355,7 @@ public:
 };
 
 
-class VarDecl {
+class VarDecl : public AstItem {
     std::vector<VarDef *> varDefs;
 public:
     void addVarDef(VarDef *varDef);
@@ -357,7 +363,7 @@ public:
     void print(int tab);
 };
 
-class ConstInitVal {
+class ConstInitVal : public AstItem {
     ConstExp *constExp;
     int row;
     std::vector<ConstInitVal *> constInitVals;
@@ -371,7 +377,7 @@ public:
     void print(int tab);
 };
 
-class ConstDef {
+class ConstDef : public AstItem {
     Token *ident;
     int row;
     ConstExp *constExps[2];
@@ -396,7 +402,7 @@ public:
     }
 };
 
-class ConstDecl {
+class ConstDecl : public AstItem {
     std::vector<ConstDef *> constDefs;
 public:
     void addConstDef(ConstDef *constDef);
@@ -406,7 +412,7 @@ public:
 
 };
 
-class Block {
+class Block : public AstItem {
     std::vector<ConstDecl *> constDecls;
     std::vector<VarDecl *> varDecls;
     std::vector<Stmt *> stmts;
@@ -420,7 +426,7 @@ public:
     void print(int tab);
 };
 
-class Stmt {
+class Stmt : public AstItem {
 public:
     virtual void print(int tab) {};
 };
@@ -528,7 +534,7 @@ public:
 
 };
 
-class FuncFParam {
+class FuncFParam : public AstItem {
     Token *ident;
     int row;
     ConstExp *constExp;
@@ -550,7 +556,7 @@ public:
     }
 };
 
-class FuncFParams {
+class FuncFParams : public AstItem {
     std::vector<FuncFParam *> funcFParams;
 public:
     void addFuncFParam(FuncFParam *funcFParam);
@@ -560,9 +566,13 @@ public:
     std::vector<FuncFParam *> getFParams() {
         return this->funcFParams;
     }
+
+    int getFParamNum() {
+        return this->funcFParams.size();
+    }
 };
 
-class FuncType {
+class FuncType : public AstItem {
     Token *funcType; // void or int
 public:
     void setFuncType(Token *funcType);
@@ -575,17 +585,23 @@ public:
 };
 
 //TODO
-class FuncRParams {
+class FuncRParams : public AstItem {
     std::vector<Exp *> paramExps;
 public:
     void addParamsExp(Exp *exp);
 
     void print(int tab);
 
+    int getRParamNum() {
+        return this->paramExps.size();
+    }
 
+    std::vector<Exp *> getRParams() {
+        return this->paramExps;
+    }
 };
 
-class FuncDef {
+class FuncDef : public AstItem {
     FuncType *funcType;
     Token *ident;
     FuncFParams *funcFParams;
@@ -601,25 +617,13 @@ public:
 
     void print(int tab);
 
-    std::vector<Item*> getFParamsAsItem() {
-        std::vector<FuncFParam*> funcFParams = this->funcFParams->getFParams();
-        std::vector<Item*> paramsAsItem;
-        for (auto iter : funcFParams) {
-            if (iter->getRow() > 0) {
-//                TODO row num
-                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow());
-                paramsAsItem.emplace_back(arrayItem);
-            } else {
-                auto *varItem = new VarItem(iter->getIdent(), false);
-                paramsAsItem.emplace_back(varItem);
-            }
-        }
-        return paramsAsItem;
+    std::vector<FuncFParam *> getFParams() {
+        return this->funcFParams->getFParams();
     }
 };
 
 
-class MainFuncDef {
+class MainFuncDef : public AstItem {
     Block *block;
 public:
     void setBlock(Block *block);
@@ -629,7 +633,7 @@ public:
 
 };
 
-class CompUnit {
+class CompUnit : public AstItem {
 public:
     std::vector<ConstDecl *> constDecls;
     std::vector<VarDecl *> varDecls;

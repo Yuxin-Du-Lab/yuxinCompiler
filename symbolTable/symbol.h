@@ -8,10 +8,13 @@
 #include "vector"
 #include "../token/Token.h"
 #include "unordered_map"
+#include "../AST/ASTBuilder.h"
 
 #define FUNC_SCOPE "FUNC_SCOPE SCOPE"
 #define BLOCK_SCOPE "BLOCK_SCOPE SCOPE"
 #define MACRO_SCOPE "COMP UNIT SCOPE"
+// interface of ast
+
 
 /* Item:
  * -var
@@ -22,9 +25,11 @@
 class Item {
 protected:
     Token *token;
+    AstItem *astItem;
 public:
-    Item(Token *tokenIn) {
+    Item(Token *tokenIn, AstItem *astItem = nullptr) {
         this->token = tokenIn;
+        this->astItem = astItem;
     };
 
     virtual void print() {
@@ -45,7 +50,7 @@ class VarItem : public Item {
 protected:
     bool isConst;
 public:
-    VarItem(Token *tokenIn, bool isConstIn) : Item(tokenIn) {
+    VarItem(Token *tokenIn, bool isConstIn, AstItem *astItem = nullptr) : Item(tokenIn, astItem) {
         this->isConst = isConstIn;
     };
 
@@ -61,8 +66,8 @@ class ArrayItem : public VarItem {
     int row1;
     int row2;
 public:
-    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, int row1In = -1, int row2In = -1) : VarItem(tokenIn,
-                                                                                                             isConstIn) {
+    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr, int row1In = -1, int row2In = -1) : VarItem(tokenIn,
+                                                                                                               isConstIn, astItem) {
         this->dimension = dimensionIn;
         this->row1 = row1In;
         this->row2 = row2In;
@@ -81,12 +86,30 @@ class FuncItem : public Item {
     bool hasReturn;
     std::vector<Item *> params;
 public:
-    FuncItem(Token *tokenIn, bool hasReturnIn) : Item(tokenIn) {
+    FuncItem(Token *tokenIn, bool hasReturnIn, AstItem *astItem = nullptr) : Item(tokenIn, astItem) {
         this->hasReturn = hasReturnIn;
     };
 
-    void addParams(std::vector<Item *> paramsIn) {
-        params.insert(params.end(), paramsIn.begin(), paramsIn.end());
+    int getFParamNum() {
+        return this->params.size();
+    }
+
+    void setFParam() {
+        if (astItem == nullptr) {
+            std::cout << "Not assign FuncItem's AST item" << std::endl;
+            return;
+        }
+        auto *funDef = (FuncDef *)this->astItem;
+        std::vector<FuncFParam *> funcFParams = funDef->getFParams();
+        for (auto iter : funcFParams) {
+            if (iter->getRow() > 0) {
+                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow(), iter);
+                this->params.emplace_back(arrayItem);
+            } else {
+                auto *varItem = new VarItem(iter->getIdent(), false, iter);
+                this->params.emplace_back(varItem);
+            }
+        }
     }
 
     void print() override {
@@ -115,12 +138,15 @@ public:
     }
 
     bool exist(const std::string &key) {
-        std::cout << "check>>>>>>>>>>>>>" << key << std::endl;
         return !(this->table.find(key) == this->table.end());
     }
 
+    Item *findItem(const std::string &key) {
+        return (this->table.find(key) == this->table.end()) ? nullptr : this->table.find(key)->second;
+    }
+
     void checkScope() {
-        for (const auto& iter : table) {
+        for (const auto &iter: table) {
             std::cout << "check--->" << iter.first << std::endl;
         }
     }
@@ -157,6 +183,15 @@ public:
             }
         }
         return false;
+    }
+
+    Item *findItem(const std::string &key) {
+        for (auto iter: this->scopeStack) {
+            if (iter->exist(key)) {
+                return iter->findItem(key);
+            }
+        }
+        return nullptr;
     }
 
     Scope *getRecentScope() {

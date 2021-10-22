@@ -5,7 +5,7 @@
 #include "syntax.h"
 #include "iostream"
 #include "../error/errorHandler.h"
-
+#include "../symbolTable/symbol.h"
 SymbolTable symbolTable;
 
 std::ofstream writeSyntaxFile("output.txt");
@@ -77,13 +77,12 @@ MainFuncDef *getMainFuncDef(std::vector<Token> &wordList, int *pointer) {
     }
     //  get main
     if (wordList[(*pointer)].getIdentity() == MAINTK) {
-        auto *funcItem = new FuncItem(&wordList[(*pointer)], true);
+        auto *funcItem = new FuncItem(&wordList[(*pointer)], true, mainFuncDefptr);
         symbolTable.getRecentScope()->addItem(funcItem);
 
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
     }
-
     Scope *mainFuncScope = new Scope(FUNC_SCOPE);
     symbolTable.pushScope(mainFuncScope);
 
@@ -289,6 +288,9 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
         if (wordList[scan].getIdentity() == ASSIGN) {
 //            is LVal   LVal = getint() or LVal = Exp
             auto *lVal = getLVal(wordList, pointer);
+            if (!symbolTable.exist(lVal->getIdent()->getKey())) {
+                throwError(UndefinedName, lVal->getIdent()->getLine());
+            }
             if (wordList[(*pointer)].getIdentity() == ASSIGN) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
@@ -355,10 +357,9 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
         funcDefptr->setFuncIdent(&wordList[*pointer]);
         writeFile4syntax(wordList[(*pointer)]);
 //        func name
-        auto *funcItem = new FuncItem(&wordList[*pointer], !(funcType->isVoid()));
+        auto *funcItem = new FuncItem(&wordList[*pointer], !(funcType->isVoid()), funcDefptr);
 
         if (symbolTable.getRecentScope()->exist(funcItem->getKey())) {
-            std::cout << "exist<<<<<<<<<<<<" << std::endl;
             throwError(NameRedefinition, funcItem->getLine());
         } else {
             symbolTable.getRecentScope()->addItem(funcItem);
@@ -370,8 +371,8 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
             if (wordList[*pointer].getIdentity() != RPARENT) {
                 auto *funcFParams = getFuncFParams(wordList, pointer);
                 funcDefptr->setFuncFParams(funcFParams);
-//              add params for func scope
-                funcItem->addParams(funcDefptr->getFParamsAsItem());
+//              set params for func scope
+                funcItem->setFParam();
             }
             Scope *funcScope = new Scope(FUNC_SCOPE);
             symbolTable.pushScope(funcScope);
@@ -453,11 +454,13 @@ FuncFParam *getFuncFParam(std::vector<Token> &wordList, int *pointer) {
 
 FuncRParams *getFuncRParams(std::vector<Token> &wordList, int *pointer, bool scanning) {
     auto *funcRParamsptr = new FuncRParams();
-    getExp(wordList, pointer, scanning);
+    auto *exp = getExp(wordList, pointer, scanning);
+    funcRParamsptr->addParamsExp(exp);
     while (wordList[*pointer].getIdentity() == COMMA) {
         writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-        getExp(wordList, pointer, scanning);
+        exp = getExp(wordList, pointer, scanning);
+        funcRParamsptr->addParamsExp(exp);
     }
     writeFile4syntax("FuncRParams", scanning);
     return funcRParamsptr;
@@ -472,6 +475,11 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
 //            function
             unaryExpptr = new FuncUnaryExp();
             ((FuncUnaryExp *) unaryExpptr)->setFuncUnaryIdent(&wordList[(*pointer)]);
+            std::string key = ((FuncUnaryExp *) unaryExpptr)->getIdent()->getKey();
+            if (!symbolTable.exist(key)) {
+                throwError(UndefinedName, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+            }
+
             writeFile4syntax(wordList[(*pointer)], scanning);
             (*pointer)++;  // for ident
             if (wordList[*pointer].getIdentity() == LPARENT) {
@@ -481,6 +489,13 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
                 if (wordList[*pointer].getIdentity() != RPARENT) {
                     auto *funcRParams = getFuncRParams(wordList, pointer, scanning);
                     ((FuncUnaryExp *) unaryExpptr)->setFuncRParams(funcRParams);
+                    if (symbolTable.exist(key)) {
+//                        exit func
+                        if (funcRParams->getRParamNum() != ((FuncItem *)symbolTable.findItem(key))->getFParamNum()) {
+                            throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                        }
+                    }
+
                 }
                 if (wordList[*pointer].getIdentity() == RPARENT) {
                     writeFile4syntax(wordList[(*pointer)], scanning);
@@ -549,6 +564,9 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
 //        lVal
         primaryExpptr = new LValPrimaryExp();
         auto *lVal = getLVal(wordList, pointer, scanning);
+        if (!symbolTable.exist(lVal->getIdent()->getKey())) {
+            throwError(UndefinedName, lVal->getIdent()->getLine());
+        }
         ((LValPrimaryExp *) primaryExpptr)->setPrimaryLVal(lVal);
     } else if (wordList[*pointer].getIdentity() == INTCON) {
 //        Number
@@ -814,8 +832,8 @@ ConstDecl *getConstDecl(std::vector<Token> &wordList, int *pointer) {
 
 //  const define
     auto *varItem = constDef->getRow() > 0 ?
-                    new ArrayItem(constDef->getIdent(), true, constDef->getRow()) :
-                    new VarItem(constDef->getIdent(), true);
+                    new ArrayItem(constDef->getIdent(), true, constDef->getRow(), constDef) :
+                    new VarItem(constDef->getIdent(), true, constDef);
     if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
         throwError(NameRedefinition, varItem->getLine());
     } else {
@@ -830,8 +848,8 @@ ConstDecl *getConstDecl(std::vector<Token> &wordList, int *pointer) {
 
         //  const define
         varItem = constDef->getRow() > 0 ?
-                  new ArrayItem(constDef->getIdent(), true, constDef->getRow()) :
-                  new VarItem(constDef->getIdent(), true);
+                  new ArrayItem(constDef->getIdent(), true, constDef->getRow(), constDef) :
+                  new VarItem(constDef->getIdent(), true, constDef);
         if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
             throwError(NameRedefinition, varItem->getLine());
         } else {
@@ -932,8 +950,8 @@ VarDecl *getVarDecl(std::vector<Token> &wordList, int *pointer) {
 
 //    var define
     auto *varItem = varDef->getRow() > 0 ?
-              new ArrayItem(varDef->getIdent(), false, varDef->getRow()) :
-              new VarItem(varDef->getIdent(), false);
+              new ArrayItem(varDef->getIdent(), false, varDef->getRow(), varDef) :
+              new VarItem(varDef->getIdent(), false, varDef);
     if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
         throwError(NameRedefinition, varItem->getLine());
     } else {
@@ -947,8 +965,8 @@ VarDecl *getVarDecl(std::vector<Token> &wordList, int *pointer) {
         varDeclptr->addVarDef(varDef);
 //        var define
         varItem = varDef->getRow() > 0 ?
-                  new ArrayItem(varDef->getIdent(), false, varDef->getRow()) :
-                  new VarItem(varDef->getIdent(), false);
+                  new ArrayItem(varDef->getIdent(), false, varDef->getRow(), varDef) :
+                  new VarItem(varDef->getIdent(), false, varDef);
         if (symbolTable.getRecentScope()->exist(varItem->getKey())) {
             throwError(NameRedefinition, varItem->getLine());
         } else {

@@ -59,6 +59,7 @@ public:
     Token(std::string &name, int lineNum = -1);
     std::string toString();
     std::string getIdentity();
+    std::string getKey();
     int getLine();
     ~Token();
 };
