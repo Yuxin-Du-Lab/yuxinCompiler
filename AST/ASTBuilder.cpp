@@ -264,8 +264,8 @@ void MulOpTree::setOp(Token *token) {
     this->op = token;
 }
 
-void LVal::setRow(int row) {
-    this->row = row;
+void LVal::setUsedDimension(int row) {
+    this->usedDimension = row;
 }
 
 void LVal::setArrayExp(Exp *exp, int row) {
@@ -352,3 +352,15 @@ void Exp::setAddExp(AddExp *addExp) {
     this->addExp = addExp;
 }
 
+int Exp::getRealDimension() {
+//    std::cout << "Exp Real Dimension: " << std::to_string(this->addExp->getRealDimension()) << std::endl;
+    return addExp->getRealDimension();
+}
+
+int ExpPrimaryExp::getRealDimension() {
+    return this->exp->getRealDimension();
+}
+
+int LValPrimaryExp::getRealDimension() {
+    return this->lVal->getRealDimension();
+}

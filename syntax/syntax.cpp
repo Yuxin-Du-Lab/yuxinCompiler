@@ -15,13 +15,13 @@ const int LeftChild = 0, RightChild = 1;
 
 void writeFile4syntax(Token token, bool scanning = false) {
     if (!scanning) {
-        writeSyntaxFile << token.toString() << std::endl;
+//        writeSyntaxFile << token.toString() << std::endl;
     }
 }
 
 void writeFile4syntax(const std::string &funcName, bool scanning = false) {
     if (!scanning) {
-        writeSyntaxFile << "<" << funcName << ">" << std::endl;
+//        writeSyntaxFile << "<" << funcName << ">" << std::endl;
     }
 }
 
@@ -428,6 +428,7 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
             if (wordList[*pointer].getIdentity() != RPARENT) {
                 auto *funcFParams = getFuncFParams(wordList, pointer);
                 funcDefptr->setFuncFParams(funcFParams);
+                funcItem->setFParam();
             }
             if (wordList[*pointer].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
@@ -463,19 +464,11 @@ FuncFParams *getFuncFParams(std::vector<Token> &wordList, int *pointer) {
     auto *funcFParamsptr = new FuncFParams();
     auto *funcFParam = getFuncFParam(wordList, pointer);
     funcFParamsptr->addFuncFParam(funcFParam);
-//    auto *varItem = funcFParam->getRow() > 0 ?
-//                    new ArrayItem(funcFParam->getIdent(), false, funcFParam->getRow()) :
-//                    new VarItem(funcFParam->getIdent(), false, funcFParam);
-//    symbolTable.getRecentScope()->addItem(varItem);
     while (wordList[*pointer].getIdentity() == COMMA) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
         funcFParam = getFuncFParam(wordList, pointer);
         funcFParamsptr->addFuncFParam(funcFParam);
-//        varItem = funcFParam->getRow() > 0 ?
-//                  new ArrayItem(funcFParam->getIdent(), false, funcFParam->getRow()) :
-//                  new VarItem(funcFParam->getIdent(), false, funcFParam);
-//        symbolTable.getRecentScope()->addItem(varItem);
     }
     writeFile4syntax("FuncFParams");
     return funcFParamsptr;
@@ -579,6 +572,10 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
                         throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
                     }
 //                  TODO params F & R type match
+                    if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams() != nullptr) {
+                        funcItem->typeMatch(((FuncUnaryExp *) unaryExpptr)->getFuncRParams()->getRParams(), ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                    }
+
                 }
                 if (wordList[*pointer].getIdentity() == RPARENT) {
                     writeFile4syntax(wordList[(*pointer)], scanning);
@@ -903,7 +900,17 @@ LVal *getLVal(std::vector<Token> &wordList, int *pointer, bool scanning) {
             throwError(RBRACKNeed, wordList[(*pointer) - 1].getLine());
         }
     }
-    lValptr->setRow(row);
+    lValptr->setUsedDimension(row);
+    auto *item = symbolTable.findItem(lValptr->getIdent()->getKey());
+    if (item != nullptr) {
+        if (item->getType() == VAR_ITEM) {
+            lValptr->setDimension(0);
+        } else if (item->getType() == ARRAY_ITEM_D1) {
+            lValptr->setDimension(1);
+        } else if (item->getType() == ARRAY_ITEM_D2) {
+            lValptr->setDimension(2);
+        }
+    }
     writeFile4syntax("LVal", scanning);
     return lValptr;
 }

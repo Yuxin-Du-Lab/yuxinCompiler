@@ -86,12 +86,17 @@ class ArrayItem : public VarItem {
     int row1;
     int row2;
 public:
-    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr, int row1In = -1, int row2In = -1) : VarItem(tokenIn,
-                                                                                                               isConstIn, astItem) {
+    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr, int row1In = -1,
+              int row2In = -1) : VarItem(tokenIn,
+                                         isConstIn, astItem) {
         this->dimension = dimensionIn;
         this->row1 = row1In;
         this->row2 = row2In;
     };
+
+    int getDimension() {
+        return dimension;
+    }
 
     void print() override {
         std::cout << "Array Item" << std::endl;
@@ -103,8 +108,8 @@ public:
 
     std::string getType() override {
         return dimension == 1 ? ARRAY_ITEM_D1 :
-                dimension == 2 ? ARRAY_ITEM_D2 :
-                VAR_ITEM;
+               dimension == 2 ? ARRAY_ITEM_D2 :
+               VAR_ITEM;
     }
 };
 
@@ -124,23 +129,23 @@ public:
         return this->params;
     }
 
-//    void setFParam() {
-//        if (astItem == nullptr) {
-//            std::cout << "Not assign FuncItem's AST item" << std::endl;
-//            return;
-//        }
-//        auto *funDef = (FuncDef *)this->astItem;
-//        std::vector<FuncFParam *> funcFParams = funDef->getFParams();
-//        for (auto iter : funcFParams) {
-//            if (iter->getRow() > 0) {
-//                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow(), iter);
-//                this->params.emplace_back(arrayItem);
-//            } else {
-//                auto *varItem = new VarItem(iter->getIdent(), false, iter);
-//                this->params.emplace_back(varItem);
-//            }
-//        }
-//    }
+    void setFParam() {
+        if (astItem == nullptr) {
+            std::cout << "Not assign FuncItem's AST item" << std::endl;
+            return;
+        }
+        auto *funDef = (FuncDef *) this->astItem;
+        std::vector<FuncFParam *> funcFParams = funDef->getFParams();
+        for (auto iter: funcFParams) {
+            if (iter->getRow() > 0) {
+                auto *arrayItem = new ArrayItem(iter->getIdent(), false, iter->getRow(), iter);
+                this->params.emplace_back(arrayItem);
+            } else {
+                auto *varItem = new VarItem(iter->getIdent(), false, iter);
+                this->params.emplace_back(varItem);
+            }
+        }
+    }
 
     void print() override {
         std::cout << "Func Item" << std::endl;
@@ -153,19 +158,17 @@ public:
         std::cout << "Params End " << std::endl;
     }
 
-    bool typeMatch(std::vector<Item *> RParams) {
-        if (RParams.size() != params.size()) {
-            std::cout << "Param Num need Match First!" << std::endl;
-            return false;
-        }
-        for (int index=0; index < RParams.size() && index <params.size(); index++) {
-            auto *param1 = (VarItem *)RParams[index];
-            auto *param2 = (VarItem *)this->params[index];
-            if (param1->getType() != param2->getType() || param1->getIsConst() != param2->getIsConst()) {
-                return false;
+    bool typeMatch(std::vector<Exp *> &RParams, int funcCallLine) {
+//        std::cout << ">>\tType Match Check" << std::endl;
+        for (int index = 0; index < RParams.size() && index < params.size(); index++) {
+            if (RParams[index]->getRealDimension() == 0 && params[index]->getType() != VAR_ITEM ||
+                RParams[index]->getRealDimension() == 1 && params[index]->getType() != ARRAY_ITEM_D1 ||
+                RParams[index]->getRealDimension() == 2 && params[index]->getType() != ARRAY_ITEM_D2) {
+//                std::cout << RParams[index]->getRealDimension() << "R---F" << params[index]->getType() << std::endl;
+                throwError(FuncParamTypeNotMatch, funcCallLine);
             }
         }
-        return true;
+        return false;
     }
 
     std::string getType() override {
@@ -186,7 +189,7 @@ public:
     }
 
     void addItem(Item *item) {
-        item->print();
+//        item->print();
         table.emplace(item->getKey(), item);
     }
 
@@ -200,12 +203,6 @@ public:
 
     Item *findItem(const std::string &key) {
         return (this->table.find(key) == this->table.end()) ? nullptr : this->table.find(key)->second;
-    }
-
-    void checkScope() {
-        for (const auto &iter: table) {
-            std::cout << "check--->" << iter.first << std::endl;
-        }
     }
 
     std::string getType() {
@@ -231,13 +228,13 @@ class SymbolTable {
     std::vector<Scope *> scopeStack;
 public:
     void pushScope(Scope *scope) {
-        std::cout << ">>> push " << scope->getType() << std::endl;
+//        std::cout << ">>> push " << scope->getType() << std::endl;
         scopeStack.emplace_back(scope);
     }
 
     void popScope() {
         Scope *pop = this->scopeStack.back();
-        std::cout << ">>> pop " << pop->getType() << std::endl;
+//        std::cout << ">>> pop " << pop->getType() << std::endl;
         scopeStack.pop_back();
     }
 
@@ -263,16 +260,16 @@ public:
         return this->scopeStack.back();
     }
 
-    bool isIdentConst(Token* token) {
+    bool isIdentConst(Token *token) {
         Item *item = findItem(token->getKey());
         if (item != nullptr) {
-            return ((VarItem *)item)->getIsConst();
+            return ((VarItem *) item)->getIsConst();
         }
         return false;
     }
 
     bool isRecentFuncScopeShouldHasReturn() {
-        for (int iter = scopeStack.size() - 1; iter >=0; iter--) {
+        for (int iter = scopeStack.size() - 1; iter >= 0; iter--) {
             if (scopeStack[iter]->getType() == FUNC_SCOPE) {
                 return scopeStack[iter]->getShouldHasReturn();
             }
@@ -281,7 +278,7 @@ public:
     }
 
     void setRecentFuncScopeReturned() {
-        for (int iter = scopeStack.size() - 1; iter >=0; iter--) {
+        for (int iter = scopeStack.size() - 1; iter >= 0; iter--) {
             if (scopeStack[iter]->getType() == FUNC_SCOPE) {
                 scopeStack[iter]->setReturned();
                 break;

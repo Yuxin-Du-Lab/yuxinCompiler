@@ -66,7 +66,7 @@ void ConstDef::print(int tab) {
     jsonLikePrint("{", tab);
 
     jsonLikePrint(this->ident->toString(), tab + 1);
-    jsonLikePrint("row: " + std::to_string(this->row), tab + 1);
+    jsonLikePrint("usedDimension: " + std::to_string(this->row), tab + 1);
     if (row >= 1) {
         this->constExps[0]->print(tab + 1);
     }
@@ -83,7 +83,7 @@ void VarDef::print(int tab) {
     jsonLikePrint("{", tab);
 
     jsonLikePrint(this->ident->toString(), tab + 1);
-    jsonLikePrint("row: " + std::to_string(this->row), tab + 1);
+    jsonLikePrint("usedDimension: " + std::to_string(this->row), tab + 1);
     if (row >= 1) {
         this->constExps[0]->print(tab + 1);
     }
@@ -109,7 +109,7 @@ void InitVal::print(int tab) {
     jsonLikePrint("InitVal", tab);
     jsonLikePrint("{", tab);
 
-    jsonLikePrint("row: " + std::to_string(this->row), tab + 1);
+    jsonLikePrint("usedDimension: " + std::to_string(this->row), tab + 1);
     if (this->row == 0) {
         this->exp->print(tab + 1);
     } else {
@@ -308,10 +308,10 @@ void LVal::print(int tab) {
     jsonLikePrint("{", tab);
 
     jsonLikePrint(this->ident->toString(), tab + 1);
-    if (this->row >= 1) {
+    if (this->usedDimension >= 1) {
         this->exps[0]->print(tab + 1);
     }
-    if (this->row >= 2) {
+    if (this->usedDimension >= 2) {
         this->exps[1]->print(tab + 1);
     }
 

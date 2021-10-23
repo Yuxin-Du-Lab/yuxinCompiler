@@ -45,6 +45,8 @@ public:
 class PrimaryExp : public AstItem {
 public:
     virtual void print(int tab) {};
+
+    virtual int getRealDimension() { return -1; };
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -53,6 +55,8 @@ public:
     void setPrimaryExp(Exp *exp);
 
     void print(int tab) override;
+
+    int getRealDimension() override;
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -61,6 +65,8 @@ public:
     void setPrimaryLVal(LVal *lVal);
 
     void print(int tab) override;
+
+    int getRealDimension() override;
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -70,12 +76,16 @@ public:
 
     void print(int tab) override;
 
-
+    int getRealDimension() override {
+        return 0;
+    }
 };
 
 class UnaryExp : public AstItem {
 public:
     virtual void print(int tab) {};
+
+    virtual int getRealDimension() { return -1; };
 };
 
 class PrimaryUnaryExp : public UnaryExp {
@@ -84,6 +94,10 @@ public:
     void setPrimaryExp(PrimaryExp *primaryExp);
 
     void print(int tab) override;
+
+    int getRealDimension() override {
+        return primaryExp->getRealDimension();
+    }
 };
 
 class FuncUnaryExp : public UnaryExp {
@@ -103,6 +117,10 @@ public:
     FuncRParams *getFuncRParams() {
         return this->funcRParams;
     }
+
+    int getRealDimension() override {
+        return 0;
+    }
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -114,6 +132,10 @@ public:
     void setUnaryExp(UnaryExp *unaryExp);
 
     void print(int tab) override;
+
+    int getRealDimension() override {
+        return unaryExp->getRealDimension();
+    }
 };
 
 class MulOpTree : public AstItem {
@@ -135,6 +157,14 @@ public:
     bool getIsLeaf() {
         return isLeaf;
     }
+
+    int getRealDimension() {
+        if (isLeaf) {
+            return value->getRealDimension();
+        } else {
+            return 0;
+        }
+    }
 };
 
 class MulExp : public AstItem {
@@ -143,6 +173,14 @@ public:
     void setRoot(MulOpTree *root);
 
     void print(int tab);
+
+    int getRealDimension() {
+        if (root->getIsLeaf()) {
+            return root->getRealDimension();
+        } else {
+            return 0;
+        }
+    }
 };
 
 class AddOpTree : public AstItem {
@@ -164,6 +202,14 @@ public:
     bool getIsLeaf() {
         return isLeaf;
     }
+
+    int getRealDimension() {
+        if (isLeaf) {
+            return value->getRealDimension();
+        } else {
+            return 0;
+        }
+    }
 };
 
 class AddExp : public AstItem {
@@ -172,6 +218,14 @@ public:
     void setRoot(AddOpTree *root);
 
     void print(int tab);
+
+    int getRealDimension() {
+        if (root->getIsLeaf()) {
+            return root->getRealDimension();
+        } else {
+            return 0;
+        }
+    }
 };
 
 class RelOpTree : public AstItem {
@@ -262,12 +316,17 @@ public:
 
 class LVal : public AstItem {
     Token *ident;
-    int row;
+    int dimension;
+    int usedDimension;
     Exp *exps[2];
 public:
     void setLValIdent(Token *token);
 
-    void setRow(int row);
+    void setUsedDimension(int row);
+
+    void setDimension(int dimension) {
+        this->dimension = dimension;
+    }
 
     void setArrayExp(Exp *exp, int row);
 
@@ -275,6 +334,10 @@ public:
 
     Token *getIdent() {
         return this->ident;
+    }
+
+    int getRealDimension() {
+        return dimension - usedDimension;
     }
 };
 
@@ -284,7 +347,10 @@ public:
     void setAddExp(AddExp *addExp);
 
     void print(int tab);
+
+    int getRealDimension();
 };
+
 
 
 class InitVal : public AstItem {
@@ -609,7 +675,7 @@ public:
         return this->paramExps.size();
     }
 
-    std::vector<Exp *> getRParams() {
+    std::vector<Exp *>& getRParams() {
         return this->paramExps;
     }
 };
