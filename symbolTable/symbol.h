@@ -56,6 +56,10 @@ public:
     virtual std::string getType() {
         return ITEM;
     }
+
+    AstItem *getAstItem() {
+        return this->astItem;
+    }
 };
 
 class VarItem : public Item {
@@ -163,7 +167,8 @@ public:
         for (int index = 0; index < RParams.size() && index < params.size(); index++) {
             if (RParams[index]->getRealDimension() == 0 && params[index]->getType() != VAR_ITEM ||
                 RParams[index]->getRealDimension() == 1 && params[index]->getType() != ARRAY_ITEM_D1 ||
-                RParams[index]->getRealDimension() == 2 && params[index]->getType() != ARRAY_ITEM_D2) {
+                RParams[index]->getRealDimension() == 2 && params[index]->getType() != ARRAY_ITEM_D2 ||
+                RParams[index]->getRealDimension() == -1) {
 //                std::cout << RParams[index]->getRealDimension() << "R---F" << params[index]->getType() << std::endl;
                 throwError(FuncParamTypeNotMatch, funcCallLine);
             }

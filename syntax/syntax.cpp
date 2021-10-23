@@ -11,17 +11,18 @@ SymbolTable symbolTable;
 
 std::ofstream writeSyntaxFile("output.txt");
 const int LeftChild = 0, RightChild = 1;
+const bool printSyntaxResult = false;
 
 
 void writeFile4syntax(Token token, bool scanning = false) {
-    if (!scanning) {
-//        writeSyntaxFile << token.toString() << std::endl;
+    if (!scanning && printSyntaxResult) {
+        writeSyntaxFile << token.toString() << std::endl;
     }
 }
 
 void writeFile4syntax(const std::string &funcName, bool scanning = false) {
-    if (!scanning) {
-//        writeSyntaxFile << "<" << funcName << ">" << std::endl;
+    if (!scanning && printSyntaxResult) {
+        writeSyntaxFile << "<" << funcName << ">" << std::endl;
     }
 }
 
@@ -234,9 +235,6 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             int formatNum = 0;
             if (wordList[*pointer].getIdentity() == STRCON) {
                 ((PrintfStmt *) stmtptr)->setFormatString(&wordList[*pointer]);
-                if (((PrintfStmt *) stmtptr)->illegalFormatString()) {
-                    throwError(IllegalFormatString, wordList[*pointer].getLine());
-                }
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
             }
@@ -250,6 +248,9 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             }
             if (formatNum != ((PrintfStmt *) stmtptr)->getFormatNum()) {
                 throwError(PrintfParamNumNotMatch, printfTK->getLine());
+            }
+            if (((PrintfStmt *) stmtptr)->illegalFormatString()) {
+                throwError(IllegalFormatString, ((PrintfStmt *) stmtptr)->getFormatStringTK()->getLine());
             }
             if (wordList[(*pointer)].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
@@ -270,11 +271,19 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
         stmtptr = new ReturnStmt();
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
-        if (wordList[(*pointer)].getIdentity() == SEMICN) {
-            writeFile4syntax(wordList[(*pointer)]);
-            (*pointer)++;
+//        TODO rewrite get exp
+        int scan = *pointer;
+        getExp(wordList, &scan, true);
+        if (scan == *pointer) {
+//            no exp
+            if (wordList[(*pointer)].getIdentity() == SEMICN) {
+                writeFile4syntax(wordList[(*pointer)]);
+                (*pointer)++;
+            } else {
+                throwError(SEMICNNeed, wordList[(*pointer) - 1].getLine());
+            }
         } else {
-//            getExp
+//            have exp
             if (!symbolTable.isRecentFuncScopeShouldHasReturn()) {
                 throwError(FuncShouldNotHaveReturn, returnTK->getLine());
             }
@@ -425,7 +434,7 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
         if (wordList[*pointer].getIdentity() == LPARENT) {
             writeFile4syntax(wordList[(*pointer)]);
             (*pointer)++;
-            if (wordList[*pointer].getIdentity() != RPARENT) {
+            if (wordList[*pointer].getIdentity() == INTTK) {
                 auto *funcFParams = getFuncFParams(wordList, pointer);
                 funcDefptr->setFuncFParams(funcFParams);
                 funcItem->setFParam();
@@ -433,11 +442,11 @@ FuncDef *getFuncDef(std::vector<Token> &wordList, int *pointer) {
             if (wordList[*pointer].getIdentity() == RPARENT) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
-                auto *funcBlock = getBlock(wordList, pointer);
-                funcDefptr->setFuncBlock(funcBlock);
             } else {
                 throwError(RPARENTNeed, wordList[(*pointer) - 1].getLine());
             }
+            auto *funcBlock = getBlock(wordList, pointer);
+            funcDefptr->setFuncBlock(funcBlock);
         }
         if (funcScope->getShouldHasReturn() && !funcScope->getReturned()) {
             throwError(FuncReturnNeed, wordList[(*pointer) - 1].getLine());
@@ -565,8 +574,10 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
 //                        exit func
                     // check params F & R num match
                     auto *funcItem = (FuncItem *) symbolTable.findItem(key);
-                    if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams() == nullptr && funcItem->getFParamNum() > 0) {
-                        throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                    if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams() == nullptr) {
+                        if (funcItem->getFParamNum() > 0) {
+                            throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                        }
                     } else if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams()->getRParamNum() !=
                                funcItem->getFParamNum()) {
                         throwError(FuncParamNumNotMatch, ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
@@ -1183,4 +1194,15 @@ Exp *getExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
     expptr->setAddExp(addExp);
     writeFile4syntax("Exp", scanning);
     return expptr;
+}
+
+int FuncUnaryExp::getRealDimension() {
+    auto *funcItem = symbolTable.findItem(this->ident->getKey());
+    if (funcItem != nullptr) {
+        auto *funcDef = (FuncDef *)funcItem->getAstItem();
+        if (funcDef!= nullptr) {
+            return funcDef->getFuncType()->isVoid() ? -1 : 0;
+        }
+    }
+    return 0;
 }

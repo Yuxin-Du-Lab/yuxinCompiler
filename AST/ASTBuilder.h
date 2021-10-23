@@ -118,9 +118,7 @@ public:
         return this->funcRParams;
     }
 
-    int getRealDimension() override {
-        return 0;
-    }
+    int getRealDimension() override;
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -586,6 +584,10 @@ public:
 
     void print(int tab) override;
 
+    Token *getFormatStringTK() {
+        return formatString;
+    }
+
     int getFormatNum() {
         int num = 0;
         for (int i = 0; i < formatString->getKey().size(); i++) {
@@ -695,6 +697,10 @@ public:
     void setFuncBlock(Block *block);
 
     void print(int tab);
+
+    FuncType *getFuncType() {
+        return this->funcType;
+    }
 
     std::vector<FuncFParam *> getFParams() {
         return this->funcFParams->getFParams();
