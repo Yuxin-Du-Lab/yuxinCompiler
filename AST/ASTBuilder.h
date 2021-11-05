@@ -10,8 +10,13 @@
 #include "vector"
 #include "../token/Token.h"
 
-class AstItem {
+#define VALUE_ERROR -999
 
+const int LeftChild = 0, RightChild = 1;
+
+class AstItem {
+public:
+    virtual void print(int tab) { std::cout << "need to be override" << std::endl; }
 };
 
 class Stmt;
@@ -22,6 +27,8 @@ class FuncRParams;
 
 class LVal;
 
+class ConstDef;
+
 class UnaryOp : public AstItem {
     Token *op;   // + - !
 //    ! only can exist in cond
@@ -29,24 +36,31 @@ class UnaryOp : public AstItem {
 public:
     void setUnaryOp(Token *token);
 
-    void print(int tab);
+    Token *getOp() {
+        return this->op;
+    }
+
+    void print(int tab) override;
 };
 
 class Number : public AstItem {
     Token *intConst;
+    int value;
 public:
     void setIntConst(Token *token);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int getConstValue();
 };
 
 class PrimaryExp : public AstItem {
 public:
-    virtual void print(int tab) {};
+    virtual int getRealDimension() { return VALUE_ERROR; };
 
-    virtual int getRealDimension() { return -1; };
+    virtual int getConstValue() { return VALUE_ERROR; };
+
+    virtual int makeIR() { return VALUE_ERROR; };
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -57,6 +71,10 @@ public:
     void print(int tab) override;
 
     int getRealDimension() override;
+
+    int getConstValue() override;
+
+    int makeIR() override;
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -67,6 +85,10 @@ public:
     void print(int tab) override;
 
     int getRealDimension() override;
+
+    int getConstValue() override;
+
+    int makeIR() override;
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -79,13 +101,19 @@ public:
     int getRealDimension() override {
         return 0;
     }
+
+    int getConstValue() override;
+
+    int makeIR() override;
 };
 
 class UnaryExp : public AstItem {
 public:
-    virtual void print(int tab) {};
+    virtual int getRealDimension() { return VALUE_ERROR; };
 
-    virtual int getRealDimension() { return -1; };
+    virtual int getConstValue() { return VALUE_ERROR; };
+
+    virtual int makeIR() { return VALUE_ERROR; };
 };
 
 class PrimaryUnaryExp : public UnaryExp {
@@ -97,6 +125,12 @@ public:
 
     int getRealDimension() override {
         return primaryExp->getRealDimension();
+    }
+
+    int makeIR() override;
+
+    int getConstValue() override {
+        return this->primaryExp->getConstValue();
     }
 };
 
@@ -119,6 +153,8 @@ public:
     }
 
     int getRealDimension() override;
+
+    int makeIR() override;
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -134,6 +170,18 @@ public:
     int getRealDimension() override {
         return unaryExp->getRealDimension();
     }
+
+    int getConstValue() override {
+        if (this->unaryOp->getOp()->getIdentity() == PLUS) {
+            return this->unaryExp->getConstValue();
+        } else if (this->unaryOp->getOp()->getIdentity() == MINU) {
+            return -this->unaryExp->getConstValue();
+        }
+//        TODO cond !
+        return VALUE_ERROR;
+    }
+
+    int makeIR() override;
 };
 
 class MulOpTree : public AstItem {
@@ -150,7 +198,7 @@ public:
 
     void serValue(UnaryExp *value);
 
-    void print(int tab);
+    void print(int tab) override;
 
     bool getIsLeaf() {
         return isLeaf;
@@ -163,6 +211,23 @@ public:
             return 0;
         }
     }
+
+    int getConstValue() {
+        if (getIsLeaf()) {
+            return this->value->getConstValue();
+        } else {
+            if (this->op->getIdentity() == MULT) {
+                return this->branch[0]->getConstValue() * this->branch[1]->getConstValue();
+            } else if (this->op->getIdentity() == DIV) {
+                return this->branch[0]->getConstValue() / this->branch[1]->getConstValue();
+            } else if (this->op->getIdentity() == MOD) {
+                return this->branch[0]->getConstValue() % this->branch[1]->getConstValue();
+            }
+        }
+        return VALUE_ERROR;
+    }
+
+    int makeIR();
 };
 
 class MulExp : public AstItem {
@@ -170,7 +235,7 @@ class MulExp : public AstItem {
 public:
     void setRoot(MulOpTree *root);
 
-    void print(int tab);
+    void print(int tab) override;
 
     int getRealDimension() {
         if (root->getIsLeaf()) {
@@ -179,6 +244,12 @@ public:
             return 0;
         }
     }
+
+    int getConstValue() {
+        return this->root->getConstValue();
+    }
+
+    int makeIR();
 };
 
 class AddOpTree : public AstItem {
@@ -195,7 +266,7 @@ public:
 
     void serValue(MulExp *value);
 
-    void print(int tab);
+    void print(int tab) override;
 
     bool getIsLeaf() {
         return isLeaf;
@@ -208,6 +279,21 @@ public:
             return 0;
         }
     }
+
+    int getConstValue() {
+        if (getIsLeaf()) {
+            return this->value->getConstValue();
+        } else {
+            if (this->op->getIdentity() == PLUS) {
+                return this->branch[0]->getConstValue() + this->branch[1]->getConstValue();
+            } else if (this->op->getIdentity() == MINU) {
+                return this->branch[0]->getConstValue() - this->branch[1]->getConstValue();
+            }
+        }
+        return VALUE_ERROR;
+    }
+
+    int makeIR();
 };
 
 class AddExp : public AstItem {
@@ -215,7 +301,7 @@ class AddExp : public AstItem {
 public:
     void setRoot(AddOpTree *root);
 
-    void print(int tab);
+    void print(int tab) override;
 
     int getRealDimension() {
         if (root->getIsLeaf()) {
@@ -224,6 +310,12 @@ public:
             return 0;
         }
     }
+
+    int getConstValue() {
+        return this->root->getConstValue();
+    }
+
+    int makeIR();
 };
 
 class RelOpTree : public AstItem {
@@ -240,7 +332,9 @@ public:
 
     void setLeafValue(AddExp *addExp);
 
-    void print(int tab);
+    void print(int tab) override;
+
+    int makeIR();
 };
 
 class RelExp : public AstItem {
@@ -248,9 +342,9 @@ class RelExp : public AstItem {
 public:
     void setRoot(RelOpTree *root);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class EqOpTree : public AstItem {
@@ -267,9 +361,9 @@ public:
 
     void setLeafValue(RelExp *relExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class EqExp : public AstItem {
@@ -279,7 +373,7 @@ public:
 
     void print(int tab);
 
-
+    int makeIR();
 };
 
 class LAndExp : public AstItem {
@@ -287,9 +381,9 @@ class LAndExp : public AstItem {
 public:
     void addEqExp(EqExp *eqExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class LOrExp : public AstItem {
@@ -297,9 +391,9 @@ class LOrExp : public AstItem {
 public:
     void addLAndExp(LAndExp *lAndExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class Cond : public AstItem {
@@ -307,9 +401,9 @@ class Cond : public AstItem {
 public:
     void setLOrExp(LOrExp *lOrExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class LVal : public AstItem {
@@ -317,6 +411,7 @@ class LVal : public AstItem {
     int dimension;
     int usedDimension;
     Exp *exps[2];
+    int constValue;
 public:
     void setLValIdent(Token *token);
 
@@ -328,7 +423,7 @@ public:
 
     void setArrayExp(Exp *exp, int row);
 
-    void print(int tab);
+    void print(int tab) override;
 
     Token *getIdent() {
         return this->ident;
@@ -337,6 +432,24 @@ public:
     int getRealDimension() {
         return dimension - usedDimension;
     }
+
+    int makeIR();
+
+    void setConstValue(int constValueIn) {
+        this->constValue = constValueIn;
+    }
+
+    int getConstValue() {
+        return this->constValue;
+    }
+
+    int getDimension() {
+        return this->dimension;
+    }
+
+    Exp *getExp(int index) {
+        return this->exps[index];
+    }
 };
 
 class Exp : public AstItem {
@@ -344,11 +457,12 @@ class Exp : public AstItem {
 public:
     void setAddExp(AddExp *addExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
     int getRealDimension();
-};
 
+    int makeIR();
+};
 
 
 class InitVal : public AstItem {
@@ -362,9 +476,9 @@ public:
 
     void addInitVal(InitVal *initVal);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class ConstExp : public AstItem {
@@ -374,9 +488,13 @@ class ConstExp : public AstItem {
 public:
     void setAddExp(AddExp *addExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
+    int getConstValue() {
+        return this->addExp->getConstValue();
+    }
 
+    int makeIR();
 };
 
 class VarDef : public AstItem {
@@ -396,7 +514,7 @@ public:
 
     void setInitVal(InitVal *initVal);
 
-    void print(int tab);
+    void print(int tab) override;
 
     Token *getIdent() {
         return this->ident;
@@ -405,6 +523,8 @@ public:
     int getRow() {
         return this->row;
     }
+
+    int makeIR();
 };
 
 
@@ -413,28 +533,68 @@ class VarDecl : public AstItem {
 public:
     void addVarDef(VarDef *varDef);
 
-    void print(int tab);
+    void print(int tab) override;
+
+    int makeIR();
 };
 
 class ConstInitVal : public AstItem {
-    ConstExp *constExp;
+    ConstExp *constExp{};
     int row;
     std::vector<ConstInitVal *> constInitVals;
+    std::vector<int> values;
+    ConstDef* constDef{};
 public:
+    void setConstDef(ConstDef *constDefIn) {
+        this->constDef = constDefIn;
+    }
+
     void setConstExp(ConstExp *constExp);
 
     void setRow(int row);
 
     void addConstInitVal(ConstInitVal *constInitVal);
 
-    void print(int tab);
+    void print(int tab) override;
+
+    void setValues() {
+        for (auto iter : this->constInitVals) {
+            std::vector<int> subValues = iter->initValues();
+            this->values.insert(this->values.end(), subValues.begin(), subValues.end());
+        }
+        for (auto iter : this->values) {
+            std::cout << std::to_string(iter) << std::endl;
+        }
+        std::cout << "check end" << std::endl;
+    }
+
+    std::vector<int> initValues() {
+        std::vector<int> tmpValues;
+        if (this->constExp != nullptr) {
+            tmpValues.emplace_back(this->constExp->getConstValue());
+        } else {
+            for (auto iter : this->constInitVals) {
+                std::vector<int> subValues = iter->initValues();
+                tmpValues.insert(tmpValues.end(), subValues.begin(), subValues.end());
+            }
+        }
+        return tmpValues;
+    }
+
+    int getValue(int row1=0, int row2=0);
+
+    int makeIR(int index = 0, bool isArr = false, Token *ident = nullptr);
+
+    int getRow() {
+        return this->row;
+    }
 };
 
 class ConstDef : public AstItem {
     Token *ident;
     int row;
     ConstExp *constExps[2];
-    ConstInitVal *constInitVal;
+    ConstInitVal *constInitVal{};
 public:
     void setIdent(Token *token);
 
@@ -444,7 +604,7 @@ public:
 
     void setConstInitVal(ConstInitVal *constInitVal);
 
-    void print(int tab);
+    void print(int tab) override;
 
     Token *getIdent() {
         return this->ident;
@@ -453,6 +613,16 @@ public:
     int getRow() {
         return this->row;
     }
+
+    ConstExp *getConstExp(int index) {
+        return this->constExps[index];
+    }
+
+    ConstInitVal *getConstInitVal() {
+        return this->constInitVal;
+    }
+
+    int makeIR();
 };
 
 class ConstDecl : public AstItem {
@@ -460,15 +630,16 @@ class ConstDecl : public AstItem {
 public:
     void addConstDef(ConstDef *constDef);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class Block : public AstItem {
-    std::vector<ConstDecl *> constDecls;
-    std::vector<VarDecl *> varDecls;
-    std::vector<Stmt *> stmts;
+//    std::vector<ConstDecl *> constDecls;
+//    std::vector<VarDecl *> varDecls;
+//    std::vector<Stmt *> stmts;
+    std::vector<AstItem *> blockItems;
 public:
     void addConstDecl(ConstDecl *constDecl);
 
@@ -476,12 +647,13 @@ public:
 
     void addStmt(Stmt *stmt);
 
-    void print(int tab);
+    void print(int tab) override;
+
+    int makeIR();
 };
 
 class Stmt : public AstItem {
-public:
-    virtual void print(int tab) {};
+    virtual int makeIR() { return -799; };
 };
 
 class LValStmt : public Stmt {
@@ -493,6 +665,8 @@ public:
     void setExp(Exp *exp);
 
     void print(int tab) override;
+
+    int makeIR() override;
 };
 
 class ExpStmt : public Stmt {
@@ -502,7 +676,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class BlockStmt : public Stmt {
@@ -512,7 +686,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class IfStmt : public Stmt {
@@ -528,7 +702,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class WhileStmt : public Stmt {
@@ -541,7 +715,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class LoopStmt : public Stmt {
@@ -551,7 +725,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class ReturnStmt : public Stmt {
@@ -561,7 +735,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class GetintStmt : public Stmt {
@@ -571,7 +745,7 @@ public:
 
     void print(int tab) override;
 
-
+    int makeIR() override;
 };
 
 class PrintfStmt : public Stmt {
@@ -600,12 +774,12 @@ public:
     }
 
     bool illegalFormatString() {
-        for (int index=1; index<formatString->getKey().size() - 1; index++) {
+        for (int index = 1; index < formatString->getKey().size() - 1; index++) {
             char c = formatString->getKey()[index];
-            if (c == '%' && formatString->getKey()[index+1] == 'd') {
-                index ++;
+            if (c == '%' && formatString->getKey()[index + 1] == 'd') {
+                index++;
                 continue;
-            } else if ( c == 32 || c == 33 || c >=40 && c <= 126) {
+            } else if (c == 32 || c == 33 || c >= 40 && c <= 126) {
                 continue;
             } else {
                 return true;
@@ -613,6 +787,8 @@ public:
         }
         return false;
     }
+
+    int makeIR() override;
 };
 
 class FuncFParam : public AstItem {
@@ -626,7 +802,7 @@ public:
 
     void setConstExp(ConstExp *constExp);
 
-    void print(int tab);
+    void print(int tab) override;
 
     Token *getIdent() {
         return ident;
@@ -635,6 +811,8 @@ public:
     int getRow() {
         return this->row;
     }
+
+    int makeIR();
 };
 
 class FuncFParams : public AstItem {
@@ -642,7 +820,7 @@ class FuncFParams : public AstItem {
 public:
     void addFuncFParam(FuncFParam *funcFParam);
 
-    void print(int tab);
+    void print(int tab) override;
 
     std::vector<FuncFParam *> getFParams() {
         return this->funcFParams;
@@ -651,6 +829,8 @@ public:
     int getFParamNum() {
         return this->funcFParams.size();
     }
+
+    int makeIR();
 };
 
 class FuncType : public AstItem {
@@ -658,7 +838,7 @@ class FuncType : public AstItem {
 public:
     void setFuncType(Token *funcType);
 
-    void print(int tab);
+    void print(int tab) override;
 
     bool isVoid() {
         return this->funcType->getIdentity() == VOIDTK;
@@ -671,15 +851,17 @@ class FuncRParams : public AstItem {
 public:
     void addParamsExp(Exp *exp);
 
-    void print(int tab);
+    void print(int tab) override;
 
     int getRParamNum() {
         return this->paramExps.size();
     }
 
-    std::vector<Exp *>& getRParams() {
+    std::vector<Exp *> &getRParams() {
         return this->paramExps;
     }
+
+    int makeIR();
 };
 
 class FuncDef : public AstItem {
@@ -696,7 +878,7 @@ public:
 
     void setFuncBlock(Block *block);
 
-    void print(int tab);
+    void print(int tab) override;
 
     FuncType *getFuncType() {
         return this->funcType;
@@ -705,6 +887,8 @@ public:
     std::vector<FuncFParam *> getFParams() {
         return this->funcFParams->getFParams();
     }
+
+    int makeIR();
 };
 
 
@@ -713,9 +897,9 @@ class MainFuncDef : public AstItem {
 public:
     void setBlock(Block *block);
 
-    void print(int tab);
+    void print(int tab) override;
 
-
+    int makeIR();
 };
 
 class CompUnit : public AstItem {
@@ -733,8 +917,9 @@ public:
 
     void setMainFuncDef(MainFuncDef *mainFuncDef);
 
-    void print();
+    void print(int tab) override;
 
+    int makeIR();
 };
 
 #endif //COMPILER_ASTBUILDER_H

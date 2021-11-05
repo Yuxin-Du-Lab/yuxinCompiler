@@ -10,7 +10,7 @@
 #include "../AST/ASTBuilder.h"
 
 
-void syntaxAnalysis(std::vector<Token> &wordList);
+CompUnit *syntaxAnalysis(std::vector<Token> &wordList, bool printSyntaxRex);
 
 ConstExp *getConstExp(std::vector<Token> &wordList, int *pointer);
 

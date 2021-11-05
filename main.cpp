@@ -3,7 +3,7 @@
 #include "syntax/syntax.h"
 
 void writeFile4WordList(std::vector<Token> wordList) {
-    std::ofstream writeLexerFile("outputWordList.txt");
+    std::ofstream writeLexerFile("LexerRes.txt");
     auto scan = wordList.begin();
     while (scan != wordList.end()) {
         writeLexerFile << scan->toString() << std::endl;
@@ -13,10 +13,17 @@ void writeFile4WordList(std::vector<Token> wordList) {
 
 // main
 int main() {
+    const bool printLexerRes = true;
+    const bool printSyntaxRex = true;
+    const bool printASTRes = true;
+    const bool printIRRes = true;
     std::ifstream readLexerFile("testfile.txt");
-//    std::ofstream writeLexerFile("output.txt");
     std::vector<Token> wordList = worldsAnalyse(readLexerFile);
-//    writeFile4WordList(wordList);
-    syntaxAnalysis(wordList);
+    if (printLexerRes) writeFile4WordList(wordList);
+    auto *compUnit = syntaxAnalysis(wordList, printSyntaxRex);
+
+    if (printASTRes) compUnit->print(0);
+
+    if (printIRRes) compUnit->makeIR();
     return 0;
 }

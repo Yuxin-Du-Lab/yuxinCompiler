@@ -65,9 +65,15 @@ public:
 class VarItem : public Item {
 protected:
     bool isConst;
+    int value;
+    ConstInitVal* constInitVal;
 public:
     VarItem(Token *tokenIn, bool isConstIn, AstItem *astItem = nullptr) : Item(tokenIn, astItem) {
         this->isConst = isConstIn;
+        if (astItem != nullptr && isConstIn) {
+            this->constInitVal = ((ConstDef *)astItem)->getConstInitVal();
+            this->value = ((ConstDef *)astItem)->getConstInitVal()->getValue();
+        }
     };
 
     void print() override {
@@ -83,12 +89,17 @@ public:
     bool getIsConst() {
         return this->isConst;
     }
+
+    virtual int getConstValue(int row1=0, int row2=0) {
+        return this->value;
+    }
 };
 
 class ArrayItem : public VarItem {
     int dimension;
     int row1;
     int row2;
+    ConstDef* constDef;
 public:
     ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr, int row1In = -1,
               int row2In = -1) : VarItem(tokenIn,
@@ -96,7 +107,12 @@ public:
         this->dimension = dimensionIn;
         this->row1 = row1In;
         this->row2 = row2In;
+        this->constDef = (ConstDef *)astItem;
     };
+
+    ConstDef *getConstDef() {
+        return this->constDef;
+    }
 
     int getDimension() {
         return dimension;
@@ -114,6 +130,10 @@ public:
         return dimension == 1 ? ARRAY_ITEM_D1 :
                dimension == 2 ? ARRAY_ITEM_D2 :
                VAR_ITEM;
+    }
+
+    int getConstValue(int row1=0, int row2=0) override {
+        return this->constDef->getConstInitVal()->getValue(row1, row2);
     }
 };
 

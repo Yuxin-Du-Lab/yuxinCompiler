@@ -3,6 +3,7 @@
 //
 
 #include "ASTBuilder.h"
+#include "../symbolTable/symbol.h"
 
 void CompUnit::addConstDecl(ConstDecl *constDecl) {
     this->constDecls.emplace_back(constDecl);
@@ -29,15 +30,18 @@ void FuncRParams::addParamsExp(Exp *exp) {
 }
 
 void Block::addConstDecl(ConstDecl *constDecl) {
-    this->constDecls.emplace_back(constDecl);
+//    this->constDecls.emplace_back(constDecl);
+    this->blockItems.emplace_back(constDecl);
 }
 
 void Block::addVarDecl(VarDecl *varDecl) {
-    this->varDecls.emplace_back(varDecl);
+//    this->varDecls.emplace_back(varDecl);
+    this->blockItems.emplace_back(varDecl);
 }
 
 void Block::addStmt(Stmt *stmt) {
-    this->stmts.emplace_back(stmt);
+//    this->stmts.emplace_back(stmt);
+    this->blockItems.emplace_back(stmt);
 }
 
 void IfStmt::setCond(Cond *cond) {
@@ -169,6 +173,7 @@ void NumberPrimaryExp::setPrimaryNumber(Number *number) {
 }
 
 void Number::setIntConst(Token *token) {
+    this->value = std::stoi(token->getKey());
     this->intConst = token;
 }
 
@@ -363,4 +368,35 @@ int ExpPrimaryExp::getRealDimension() {
 
 int LValPrimaryExp::getRealDimension() {
     return this->lVal->getRealDimension();
+}
+
+int ExpPrimaryExp::getConstValue() {
+    return ((ConstExp *)this->exp)->getConstValue();
+}
+
+int Number::getConstValue() {
+    return this->value;
+}
+
+int NumberPrimaryExp::getConstValue() {
+    return this->number->getConstValue();
+}
+
+int LValPrimaryExp::getConstValue() {
+    return this->lVal->getConstValue();
+}
+
+int ConstInitVal::getValue(int row1, int row2)  {
+    if (this->constExp != nullptr) {
+        return this->constExp->getConstValue();
+    } else {
+        if (this->values.empty()) {
+            setValues();
+        }
+        if (this->constDef->getRow() == 1) {
+            return this->values[row1];
+        } else if (this->constDef->getRow() == 2) {
+            return this->values[row1 * this->constDef->getConstExp(1)->getConstValue() + row2];
+        }
+    }
 }

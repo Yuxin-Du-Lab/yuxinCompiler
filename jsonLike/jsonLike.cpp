@@ -4,7 +4,7 @@
 
 #include "../AST/ASTBuilder.h"
 
-std::ofstream ASTFile("AST.txt");
+std::ofstream ASTFile("ASTRes.txt");
 
 void jsonLikePrint(const std::string &value, int tab) {
     std::string tabString;
@@ -15,8 +15,7 @@ void jsonLikePrint(const std::string &value, int tab) {
     ASTFile << tabString << value << std::endl;
 }
 
-void CompUnit::print() {
-    int tab = 0;
+void CompUnit::print(int tab) {
     jsonLikePrint("CompUnit", tab);
     jsonLikePrint("{", tab);
     for (auto iter: this->constDecls) {
@@ -139,15 +138,19 @@ void Block::print(int tab) {
     jsonLikePrint("Block", tab);
     jsonLikePrint("{", tab);
 
-    for (auto iter: this->constDecls) {
-        iter->print(tab + 1);
-    }
+//    for (auto iter: this->constDecls) {
+//        iter->print(tab + 1);
+//    }
+//
+//    for (auto iter: this->varDecls) {
+//        iter->print(tab + 1);
+//    }
+//
+//    for (auto iter: this->stmts) {
+//        iter->print(tab + 1);
+//    }
 
-    for (auto iter: this->varDecls) {
-        iter->print(tab + 1);
-    }
-
-    for (auto iter: this->stmts) {
+    for (auto iter: this->blockItems) {
         iter->print(tab + 1);
     }
 

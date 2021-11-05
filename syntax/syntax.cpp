@@ -9,31 +9,34 @@
 
 SymbolTable symbolTable;
 
-std::ofstream writeSyntaxFile("output.txt");
-const int LeftChild = 0, RightChild = 1;
-const bool printSyntaxResult = false;
+std::ofstream writeSyntaxFile("SyntaxRes.txt");
+bool printSyntaxRes = false;
+bool gettingConstExp = false;
 
 
 void writeFile4syntax(Token token, bool scanning = false) {
-    if (!scanning && printSyntaxResult) {
+    if (!scanning && printSyntaxRes) {
         writeSyntaxFile << token.toString() << std::endl;
     }
 }
 
 void writeFile4syntax(const std::string &funcName, bool scanning = false) {
-    if (!scanning && printSyntaxResult) {
+    if (!scanning && printSyntaxRes) {
         writeSyntaxFile << "<" << funcName << ">" << std::endl;
     }
 }
 
-void syntaxAnalysis(std::vector<Token> &wordList) {
+CompUnit *syntaxAnalysis(std::vector<Token> &wordList, bool printSyntaxRex) {
+    printSyntaxRes = printSyntaxRex;
+
     int pointer = 0;
 //    Comp Unit Scope
-    Scope *compUnitScope = new Scope(MACRO_SCOPE);
+    auto *compUnitScope = new Scope(MACRO_SCOPE);
     symbolTable.pushScope(compUnitScope);
     CompUnit *compUnit = getCompUnit(wordList, &pointer);
     symbolTable.popScope();
-//    compUnit->print();
+
+    return compUnit;
 }
 
 CompUnit *getCompUnit(std::vector<Token> &wordList, int *pointer) {
@@ -510,7 +513,11 @@ FuncFParam *getFuncFParam(std::vector<Token> &wordList, int *pointer) {
         row++;
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+
+        gettingConstExp = true;
         auto *constExpRow = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         funcFParamptr->setConstExp(constExpRow);
         if (wordList[*pointer].getIdentity() == RBRACK) {
             writeFile4syntax(wordList[(*pointer)]);
@@ -659,6 +666,22 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
 //        lVal
         primaryExpptr = new LValPrimaryExp();
         auto *lVal = getLVal(wordList, pointer, scanning);
+        if (gettingConstExp) {
+            Item* item = symbolTable.findItem(lVal->getIdent()->getKey());
+            if (lVal->getDimension() == 0) {
+                lVal->setConstValue(((VarItem *)item)->getConstValue());
+            } else {
+                ConstInitVal *constInitVal = ((ArrayItem *)item)->getConstDef()->getConstInitVal();
+                if (lVal->getDimension() == 1) {
+                    int row1 = ((ConstExp *)lVal->getExp(0))->getConstValue();
+                    lVal->setConstValue(((ArrayItem*)item)->getConstValue(row1));
+                } else if (lVal->getDimension() == 2) {
+                    int row1 = ((ConstExp *)lVal->getExp(0))->getConstValue();
+                    int row2 = ((ConstExp *)lVal->getExp(1))->getConstValue();
+                    lVal->setConstValue(((ArrayItem*)item)->getConstValue(row1, row2));
+                }
+            }
+        }
         if (!symbolTable.exist(lVal->getIdent()->getKey())) {
             throwError(UndefinedName, lVal->getIdent()->getLine());
         }
@@ -986,7 +1009,11 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+
+        gettingConstExp = true;
         auto constExp = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         constDefptr->setArrayConstExp(constExp, row);
         row++;
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
@@ -999,7 +1026,11 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].getIdentity() == LBRACK) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+
+        gettingConstExp = true;
         auto constExp = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         constDefptr->setArrayConstExp(constExp, row);
         row++;
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
@@ -1015,8 +1046,11 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
     }
 //    getConstInitVal();
     auto *constInitVal = getConstInitVal(wordList, pointer);
+    constInitVal->setConstDef(constDefptr);
+
     constDefptr->setConstInitVal(constInitVal);
     constDefptr->setRow(row);
+    constInitVal->getValue();
     writeFile4syntax("ConstDef");
     return constDefptr;
 }
@@ -1026,17 +1060,18 @@ ConstInitVal *getConstInitVal(std::vector<Token> &wordList, int *pointer) {
     int row = 0;
     if (wordList[(*pointer)].getIdentity() == LBRACE) {
 //        '{' [ ConstInitVal { ',' ConstInitVal } ] '}'
-        row++;
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
 //        [ ConstInitVal { ',' ConstInitVal } ]
         if (wordList[(*pointer)].getIdentity() != RBRACE) {
             auto *constInitVal = getConstInitVal(wordList, pointer);
             constInitValptr->addConstInitVal(constInitVal);
+            row++;
             while (wordList[(*pointer)].getIdentity() == COMMA) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
                 constInitVal = getConstInitVal(wordList, pointer);
+                row++;
                 constInitValptr->addConstInitVal(constInitVal);
             }
         }
@@ -1046,7 +1081,10 @@ ConstInitVal *getConstInitVal(std::vector<Token> &wordList, int *pointer) {
         }
     } else {
 //        getConstExp
+        gettingConstExp = true;
         auto *constExp = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         constInitValptr->setConstExp(constExp);
     }
     constInitValptr->setRow(row);
@@ -1110,7 +1148,11 @@ VarDef *getVarDef(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].identity == LBRACK) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+
+        gettingConstExp = true;
         auto *constExp = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         varDefptr->setArrayConstExp(constExp, row);
         row++;
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
@@ -1123,7 +1165,11 @@ VarDef *getVarDef(std::vector<Token> &wordList, int *pointer) {
     if (wordList[(*pointer)].identity == LBRACK) {
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
+
+        gettingConstExp = true;
         auto *constExp = getConstExp(wordList, pointer);
+        gettingConstExp = false;
+
         varDefptr->setArrayConstExp(constExp, row);
         row++;
         if (wordList[(*pointer)].getIdentity() == RBRACK) {
