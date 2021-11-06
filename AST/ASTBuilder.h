@@ -17,6 +17,8 @@ const int LeftChild = 0, RightChild = 1;
 class AstItem {
 public:
     virtual void print(int tab) { std::cout << "need to be override" << std::endl; }
+
+    virtual int makeIR() { return VALUE_ERROR; }
 };
 
 class Stmt;
@@ -411,7 +413,7 @@ class LVal : public AstItem {
     int dimension;
     int usedDimension;
     Exp *exps[2];
-    int constValue;
+    int constValue = VALUE_ERROR;
 public:
     void setLValIdent(Token *token);
 
@@ -466,7 +468,7 @@ public:
 
 
 class InitVal : public AstItem {
-    Exp *exp;
+    Exp *exp{};
     int row;
     std::vector<InitVal *> initVals;
 public:
@@ -478,7 +480,7 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR(int index = 0, bool isArr = false, Token *ident = nullptr);
 };
 
 class ConstExp : public AstItem {
@@ -535,7 +537,7 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR() override;
 };
 
 class ConstInitVal : public AstItem {
@@ -632,7 +634,7 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR() override;
 };
 
 class Block : public AstItem {
@@ -653,7 +655,7 @@ public:
 };
 
 class Stmt : public AstItem {
-    virtual int makeIR() { return -799; };
+    virtual int makeIR() override { return VALUE_ERROR; };
 };
 
 class LValStmt : public Stmt {
