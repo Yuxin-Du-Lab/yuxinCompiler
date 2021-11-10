@@ -347,6 +347,17 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
             if (symbolTable.isIdentConst(lVal->getIdent())) {
                 throwError(ConstCannotBeREAssign, lVal->getIdent()->getLine());
             }
+            auto *item = symbolTable.findItem(lVal->getIdent()->getKey());
+            if (item != nullptr) {
+                if (item->getType() == VAR_ITEM) {
+                    //0 d
+                    lVal->setRows();
+                } else if (item->getType() == ARRAY_ITEM_D1) {
+                    lVal->setRows(((ArrayItem*)item)->getRow1());
+                } else if (item->getType() == ARRAY_ITEM_D2) {
+                    lVal->setRows(((ArrayItem*)item)->getRow1(), ((ArrayItem*)item)->getRow2());
+                }
+            }
             if (wordList[(*pointer)].getIdentity() == ASSIGN) {
                 writeFile4syntax(wordList[(*pointer)]);
                 (*pointer)++;
@@ -568,7 +579,7 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
             }
 
             writeFile4syntax(wordList[(*pointer)], scanning);
-            (*pointer)++;  // for ident
+            (*pointer)++;  // for name
             if (wordList[*pointer].getIdentity() == LPARENT) {
 //                [FuncRParams]
                 writeFile4syntax(wordList[(*pointer)], scanning);

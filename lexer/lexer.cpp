@@ -22,6 +22,7 @@ std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
 //        std::cout << ">>>get line : " << bufferLine << std::endl;
         pointer = 0;
 //      analyse:
+
         while (bufferLine[pointer] != '\0') {
             char c = bufferLine[pointer];
 //            std::cout << ">>>now check : " << c << std::endl;

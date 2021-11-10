@@ -66,13 +66,13 @@ class VarItem : public Item {
 protected:
     bool isConst;
     int value;
-    ConstInitVal* constInitVal;
+    ConstInitVal *constInitVal;
 public:
     VarItem(Token *tokenIn, bool isConstIn, AstItem *astItem = nullptr) : Item(tokenIn, astItem) {
         this->isConst = isConstIn;
         if (astItem != nullptr && isConstIn) {
-            this->constInitVal = ((ConstDef *)astItem)->getConstInitVal();
-            this->value = ((ConstDef *)astItem)->getConstInitVal()->getValue();
+            this->constInitVal = ((ConstDef *) astItem)->getConstInitVal();
+            this->value = ((ConstDef *) astItem)->getConstInitVal()->getValue();
         }
     };
 
@@ -90,7 +90,7 @@ public:
         return this->isConst;
     }
 
-    virtual int getConstValue(int row1=0, int row2=0) {
+    virtual int getConstValue(int row1 = 0, int row2 = 0) {
         return this->value;
     }
 };
@@ -99,15 +99,38 @@ class ArrayItem : public VarItem {
     int dimension;
     int row1;
     int row2;
-    ConstDef* constDef;
+    bool is2rowFuncParam = false;
+    ConstDef *constDef{};
+    VarDef *varDef{};
 public:
-    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr, int row1In = -1,
-              int row2In = -1) : VarItem(tokenIn,
-                                         isConstIn, astItem) {
+    ArrayItem(Token *tokenIn, bool isConstIn, int dimensionIn = 0, AstItem *astItem = nullptr) : VarItem(tokenIn,
+                                                                                                         isConstIn,
+                                                                                                         astItem) {
         this->dimension = dimensionIn;
-        this->row1 = row1In;
-        this->row2 = row2In;
-        this->constDef = (ConstDef *)astItem;
+        if (astItem->getType() == FuncFParamType) {
+            if (((FuncFParam *) astItem)->getRow() == 2) {
+                this->is2rowFuncParam = true;
+                this->row2 = ((FuncFParam *) astItem)->getRow2ConstExp()->getConstValue();
+            }
+            return;
+        }
+        if (isConstIn) {
+            this->constDef = (ConstDef *) astItem;
+            if (dimensionIn == 1) {
+                this->row1 = this->constDef->getConstExp(0)->getConstValue();
+            } else if (dimensionIn == 2) {
+                this->row1 = this->constDef->getConstExp(0)->getConstValue();
+                this->row2 = this->constDef->getConstExp(1)->getConstValue();
+            }
+        } else {
+            this->varDef = (VarDef *) astItem;
+            if (dimensionIn == 1) {
+                this->row1 = this->varDef->getConstExp(0)->getConstValue();
+            } else if (dimensionIn == 2) {
+                this->row1 = this->varDef->getConstExp(0)->getConstValue();
+                this->row2 = this->varDef->getConstExp(1)->getConstValue();
+            }
+        }
     };
 
     ConstDef *getConstDef() {
@@ -132,8 +155,16 @@ public:
                VAR_ITEM;
     }
 
-    int getConstValue(int row1=0, int row2=0) override {
-        return this->constDef->getConstInitVal()->getValue(row1, row2);
+    int getConstValue(int row1In = 0, int row2In = 0) override {
+        return this->constDef->getConstInitVal()->getValue(row1In, row2In);
+    }
+
+    int getRow1() {
+        return this->row1;
+    }
+
+    int getRow2() {
+        return this->row2;
     }
 };
 
@@ -273,9 +304,10 @@ public:
     }
 
     Item *findItem(const std::string &key) {
-        for (auto iter: this->scopeStack) {
-            if (iter->exist(key)) {
-                return iter->findItem(key);
+
+        for (int scan = this->scopeStack.size() - 1; scan >= 0; scan --) {
+            if (this->scopeStack[scan]->exist(key)) {
+                return this->scopeStack[scan]->findItem(key);
             }
         }
         return nullptr;

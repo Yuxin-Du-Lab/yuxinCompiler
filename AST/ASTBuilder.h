@@ -11,6 +11,55 @@
 #include "../token/Token.h"
 
 #define VALUE_ERROR -999
+#define AstItemType 0
+#define UnaryOpType 1
+#define NumberType 2
+#define PrimaryExpType 3
+#define ExpPrimaryExpType 4
+#define LValPrimaryExpType 5
+#define NumberPrimaryExpType 6
+#define UnaryExpType 7
+#define PrimaryUnaryExpType 8
+#define FuncUnaryExpType 9
+#define UnaryUnaryExpType 10
+#define MulOpTreeType 11
+#define MulExpType 12
+#define AddOpTreeType 13
+#define AddExpType 14
+#define RelOpTreeType 15
+#define RelExpType 16
+#define EqOpTreeType 17
+#define EqExpType 18
+#define LAndExpType 19
+#define LOrExpType 20
+#define CondType 21
+#define LValType 22
+#define ExpType 23
+#define InitValType 24
+#define ConstExpType 25
+#define VarDefType 26
+#define VarDeclType 27
+#define ConstInitValType 28
+#define ConstDefType 29
+#define ConstDeclType 30
+#define BlockType 31
+#define StmtType 32
+#define ExpStmtType 33
+#define BlockStmtType 34
+#define IfStmtType 35
+#define WhileStmtType 36
+#define LoopStmtType 37
+#define ReturnStmtType 38
+#define GetintStmtType 39
+#define PrintfStmtType 40
+#define FuncFParamType 41
+#define FuncFParamsType 42
+#define FuncTypeType 43
+#define FuncRParamsType 44
+#define FuncDefType 45
+#define MainFuncDefType 46
+#define CompUnitType 47
+#define LValStmtType 48
 
 const int LeftChild = 0, RightChild = 1;
 
@@ -19,6 +68,8 @@ public:
     virtual void print(int tab) { std::cout << "need to be override" << std::endl; }
 
     virtual int makeIR() { return VALUE_ERROR; }
+
+    virtual int getType() { return AstItemType; }
 };
 
 class Stmt;
@@ -43,6 +94,10 @@ public:
     }
 
     void print(int tab) override;
+
+    int getType() override {
+        return UnaryOpType;
+    }
 };
 
 class Number : public AstItem {
@@ -54,6 +109,10 @@ public:
     void print(int tab) override;
 
     int getConstValue();
+
+    int getType() override {
+        return NumberType;
+    }
 };
 
 class PrimaryExp : public AstItem {
@@ -63,6 +122,10 @@ public:
     virtual int getConstValue() { return VALUE_ERROR; };
 
     virtual int makeIR() { return VALUE_ERROR; };
+
+    int getType() override {
+        return PrimaryExpType;
+    }
 };
 
 class ExpPrimaryExp : public PrimaryExp {
@@ -77,6 +140,10 @@ public:
     int getConstValue() override;
 
     int makeIR() override;
+
+    int getType() override {
+        return ExpPrimaryExpType;
+    }
 };
 
 class LValPrimaryExp : public PrimaryExp {
@@ -91,6 +158,10 @@ public:
     int getConstValue() override;
 
     int makeIR() override;
+
+    int getType() override {
+        return LValPrimaryExpType;
+    }
 };
 
 class NumberPrimaryExp : public PrimaryExp {
@@ -107,6 +178,10 @@ public:
     int getConstValue() override;
 
     int makeIR() override;
+
+    int getType() override {
+        return NumberPrimaryExpType;
+    }
 };
 
 class UnaryExp : public AstItem {
@@ -116,6 +191,10 @@ public:
     virtual int getConstValue() { return VALUE_ERROR; };
 
     virtual int makeIR() { return VALUE_ERROR; };
+
+    int getType() override {
+        return UnaryExpType;
+    }
 };
 
 class PrimaryUnaryExp : public UnaryExp {
@@ -133,6 +212,10 @@ public:
 
     int getConstValue() override {
         return this->primaryExp->getConstValue();
+    }
+
+    int getType() override {
+        return PrimaryUnaryExpType;
     }
 };
 
@@ -157,6 +240,10 @@ public:
     int getRealDimension() override;
 
     int makeIR() override;
+
+    int getType() override {
+        return FuncUnaryExpType;
+    }
 };
 
 class UnaryUnaryExp : public UnaryExp {
@@ -184,6 +271,10 @@ public:
     }
 
     int makeIR() override;
+
+    int getType() override {
+        return UnaryUnaryExpType;
+    }
 };
 
 class MulOpTree : public AstItem {
@@ -230,6 +321,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return MulOpTreeType;
+    }
 };
 
 class MulExp : public AstItem {
@@ -252,6 +347,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return MulExpType;
+    }
 };
 
 class AddOpTree : public AstItem {
@@ -296,6 +395,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return AddOpTreeType;
+    }
 };
 
 class AddExp : public AstItem {
@@ -318,6 +421,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return AddExpType;
+    }
 };
 
 class RelOpTree : public AstItem {
@@ -337,6 +444,11 @@ public:
     void print(int tab) override;
 
     int makeIR();
+
+
+    int getType() override {
+        return RelOpTreeType;
+    }
 };
 
 class RelExp : public AstItem {
@@ -347,6 +459,10 @@ public:
     void print(int tab) override;
 
     int makeIR();
+
+    int getType() override {
+        return RelExpType;
+    }
 };
 
 class EqOpTree : public AstItem {
@@ -366,6 +482,10 @@ public:
     void print(int tab) override;
 
     int makeIR();
+
+    int getType() override {
+        return EqOpTreeType;
+    }
 };
 
 class EqExp : public AstItem {
@@ -376,6 +496,10 @@ public:
     void print(int tab);
 
     int makeIR();
+
+    int getType() override {
+        return EqExpType;
+    }
 };
 
 class LAndExp : public AstItem {
@@ -385,7 +509,11 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR(int and_part_end);
+
+    int getType() override {
+        return LAndExpType;
+    }
 };
 
 class LOrExp : public AstItem {
@@ -395,7 +523,11 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR(int if_label, int else_label, int end_label);
+
+    int getType() override {
+        return LOrExpType;
+    }
 };
 
 class Cond : public AstItem {
@@ -405,7 +537,11 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR(int if_label, int else_label, int end_label);
+
+    int getType() override {
+        return CondType;
+    }
 };
 
 class LVal : public AstItem {
@@ -414,6 +550,8 @@ class LVal : public AstItem {
     int usedDimension;
     Exp *exps[2];
     int constValue = VALUE_ERROR;
+    int row1;
+    int row2;
 public:
     void setLValIdent(Token *token);
 
@@ -452,6 +590,23 @@ public:
     Exp *getExp(int index) {
         return this->exps[index];
     }
+
+    void setRows(int row1In = -1, int row2In = -1) {
+        this->row1 = row1In;
+        this->row2 = row2In;
+    }
+
+    int getRow1() {
+        return this->row1;
+    }
+
+    int getRow2() {
+        return this->row2;
+    }
+
+    int getType() override {
+        return LValType;
+    }
 };
 
 class Exp : public AstItem {
@@ -464,6 +619,10 @@ public:
     int getRealDimension();
 
     int makeIR();
+
+    int getType() override {
+        return ExpType;
+    }
 };
 
 
@@ -481,11 +640,15 @@ public:
     void print(int tab) override;
 
     int makeIR(int index = 0, bool isArr = false, Token *ident = nullptr);
+
+    int getType() override {
+        return InitValType;
+    }
 };
 
 class ConstExp : public AstItem {
     AddExp *addExp;
-//    ident used must be const HOW TO DO?
+//    name used must be const HOW TO DO?
 // TODO
 public:
     void setAddExp(AddExp *addExp);
@@ -497,6 +660,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return ConstExpType;
+    }
 };
 
 class VarDef : public AstItem {
@@ -527,6 +694,14 @@ public:
     }
 
     int makeIR();
+
+    ConstExp *getConstExp(int index) {
+        return this->constExps[index];
+    }
+
+    int getType() override {
+        return VarDefType;
+    }
 };
 
 
@@ -538,6 +713,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return VarDeclType;
+    }
 };
 
 class ConstInitVal : public AstItem {
@@ -545,7 +724,7 @@ class ConstInitVal : public AstItem {
     int row;
     std::vector<ConstInitVal *> constInitVals;
     std::vector<int> values;
-    ConstDef* constDef{};
+    ConstDef *constDef{};
 public:
     void setConstDef(ConstDef *constDefIn) {
         this->constDef = constDefIn;
@@ -560,14 +739,10 @@ public:
     void print(int tab) override;
 
     void setValues() {
-        for (auto iter : this->constInitVals) {
+        for (auto iter: this->constInitVals) {
             std::vector<int> subValues = iter->initValues();
             this->values.insert(this->values.end(), subValues.begin(), subValues.end());
         }
-        for (auto iter : this->values) {
-            std::cout << std::to_string(iter) << std::endl;
-        }
-        std::cout << "check end" << std::endl;
     }
 
     std::vector<int> initValues() {
@@ -575,7 +750,7 @@ public:
         if (this->constExp != nullptr) {
             tmpValues.emplace_back(this->constExp->getConstValue());
         } else {
-            for (auto iter : this->constInitVals) {
+            for (auto iter: this->constInitVals) {
                 std::vector<int> subValues = iter->initValues();
                 tmpValues.insert(tmpValues.end(), subValues.begin(), subValues.end());
             }
@@ -583,12 +758,23 @@ public:
         return tmpValues;
     }
 
-    int getValue(int row1=0, int row2=0);
+    int getValue(int row1 = 0, int row2 = 0);
 
     int makeIR(int index = 0, bool isArr = false, Token *ident = nullptr);
 
     int getRow() {
         return this->row;
+    }
+
+    int getType() override {
+        return ConstInitValType;
+    }
+
+    std::vector<int> getValues() {
+        if (values.empty()) {
+            this->setValues();
+        }
+        return this->values;
     }
 };
 
@@ -625,6 +811,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return ConstDefType;
+    }
 };
 
 class ConstDecl : public AstItem {
@@ -635,6 +825,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return ConstDeclType;
+    }
 };
 
 class Block : public AstItem {
@@ -651,11 +845,20 @@ public:
 
     void print(int tab) override;
 
-    int makeIR();
+    int makeIR(bool isFuncBlock= false);
+
+    int getType() override {
+        return BlockType;
+    }
 };
 
 class Stmt : public AstItem {
-    virtual int makeIR() override { return VALUE_ERROR; };
+public:
+    virtual int makeIR() override;
+
+    int getType() override {
+        return StmtType;
+    }
 };
 
 class LValStmt : public Stmt {
@@ -669,6 +872,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return LValStmtType;
+    }
 };
 
 class ExpStmt : public Stmt {
@@ -679,6 +886,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return ExpStmtType;
+    }
 };
 
 class BlockStmt : public Stmt {
@@ -689,6 +900,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return BlockStmtType;
+    }
 };
 
 class IfStmt : public Stmt {
@@ -705,6 +920,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return IfStmtType;
+    }
 };
 
 class WhileStmt : public Stmt {
@@ -718,6 +937,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return WhileStmtType;
+    }
 };
 
 class LoopStmt : public Stmt {
@@ -728,6 +951,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return LoopStmtType;
+    }
 };
 
 class ReturnStmt : public Stmt {
@@ -738,6 +965,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return ReturnStmtType;
+    }
 };
 
 class GetintStmt : public Stmt {
@@ -748,6 +979,10 @@ public:
     void print(int tab) override;
 
     int makeIR() override;
+
+    int getType() override {
+        return GetintStmtType;
+    }
 };
 
 class PrintfStmt : public Stmt {
@@ -791,6 +1026,10 @@ public:
     }
 
     int makeIR() override;
+
+    int getType() override {
+        return PrintfStmtType;
+    }
 };
 
 class FuncFParam : public AstItem {
@@ -815,6 +1054,21 @@ public:
     }
 
     int makeIR();
+
+    ConstExp *getRow2ConstExp() {
+        return this->constExp;
+    }
+
+    int getType() override {
+        return FuncFParamType;
+    }
+
+    int getRow2() {
+        if (this->row == 2) {
+            return this->constExp->getConstValue();
+        }
+        return VALUE_ERROR;
+    }
 };
 
 class FuncFParams : public AstItem {
@@ -833,6 +1087,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return FuncFParamsType;
+    }
 };
 
 class FuncType : public AstItem {
@@ -844,6 +1102,14 @@ public:
 
     bool isVoid() {
         return this->funcType->getIdentity() == VOIDTK;
+    }
+
+    Token *getToken() {
+        return this->funcType;
+    }
+
+    int getType() override {
+        return FuncTypeType;
     }
 };
 
@@ -864,6 +1130,10 @@ public:
     }
 
     int makeIR();
+
+    int getType() override {
+        return FuncRParamsType;
+    }
 };
 
 class FuncDef : public AstItem {
@@ -886,11 +1156,19 @@ public:
         return this->funcType;
     }
 
+    Token *getIdent() {
+        return this->ident;
+    }
+
     std::vector<FuncFParam *> getFParams() {
         return this->funcFParams->getFParams();
     }
 
     int makeIR();
+
+    int getType() override {
+        return FuncDefType;
+    }
 };
 
 
@@ -902,6 +1180,10 @@ public:
     void print(int tab) override;
 
     int makeIR();
+
+    int getType() override {
+        return MainFuncDefType;
+    }
 };
 
 class CompUnit : public AstItem {
@@ -922,6 +1204,10 @@ public:
     void print(int tab) override;
 
     int makeIR();
+
+    int getType() override {
+        return CompUnitType;
+    }
 };
 
 #endif //COMPILER_ASTBUILDER_H
