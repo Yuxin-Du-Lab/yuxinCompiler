@@ -3,7 +3,7 @@
 //
 
 #include "iostream"
-#include "IRmaker.h"
+#include "IRScope.h"
 
 std::string IRScope::getLinkedName(IRSymbolItem *itemIn)  {
     if (this->records.find(itemIn->getName()) != this->records.end()) {
@@ -64,4 +64,15 @@ void IRScope::check() {
         auto *child = this->table->id2scope(iter);
         child->check();
     }
+}
+
+IRSymbolItem *IRScope::findItem(std::string name)  {
+    if (this->records.find(name) != this->records.end()) {
+        return this->records.find(name)->second;
+    }
+    if (this->fatherScopeId == -1) {
+        return nullptr;
+    }
+    auto *father = table->id2scope(this->fatherScopeId);
+    return father->findItem(name);
 }

@@ -2,8 +2,8 @@
 // Created by yuxin on 2021/11/10.
 //
 
-#ifndef COMPILER_IRMAKER_H
-#define COMPILER_IRMAKER_H
+#ifndef COMPILER_IRSCOPE_H
+#define COMPILER_IRSCOPE_H
 
 #define IRSymbolItemType 0
 #define VarIRItemType 1
@@ -68,13 +68,19 @@ public:
     void check() override {
         std::cout << "<ConstVarIRItem> " << this->getName() << " : " << std::to_string(this->value) << std::endl;
     }
+
+    int getValue() {
+        return this->value;
+    }
 };
 
 class ArrIRItem : public IRSymbolItem {
     int row;
+    int row_2;
 public:
-    ArrIRItem(std::string identIn, int rowIn) : IRSymbolItem(std::move(identIn)) {
+    ArrIRItem(std::string identIn, int rowIn, int row_2In=-1) : IRSymbolItem(std::move(identIn)) {
         this->row = rowIn;
+        this->row_2 = row_2In;
     }
 
     int getType() override {
@@ -85,6 +91,10 @@ public:
         return this->row;
     }
 
+    int getRow_2() {
+        return this->row_2;
+    }
+
     void check() override {
         std::cout << "<ArrIRItem> " << this->getName() << "[" << std::to_string(this->row) << "]" << std::endl;
     }
@@ -92,9 +102,11 @@ public:
 
 class ConstArrIRItem : public ArrIRItem {
     std::vector<int> values;
+    int row_2;
 public:
-    ConstArrIRItem(std::string identIn, int rowIn, std::vector<int> valuesIn) : ArrIRItem(std::move(identIn), rowIn) {
+    ConstArrIRItem(std::string identIn, int rowIn, std::vector<int> valuesIn, int row_2In=-1) : ArrIRItem(std::move(identIn), rowIn, row_2In) {
         this->values.insert(this->values.end(), valuesIn.begin(), valuesIn.end());
+        this->row_2 = row_2In;
     }
 
     int getType() override {
@@ -123,6 +135,10 @@ public:
 
     void check() override {
         std::cout << "<FuncIRItem> " << this->getName() << " para num: " << std::to_string(this->paraNum) << std::endl;
+    }
+
+    int getParaNum() {
+        return this->paraNum;
     }
 };
 
@@ -197,6 +213,8 @@ public:
 
     int findScope4IRItem(IRSymbolItem *itemIn);
 
+    IRSymbolItem *findItem(std::string name);
+
     void check();
 };
 
@@ -236,6 +254,14 @@ public:
     int getCurrentScopeId() {
         return this->temporaryScopeId;
     }
+
+    IRSymbolItem *findItemFromTable(std::string name) {
+        IRScope *currentScope = IRTable.find(this->temporaryScopeId)->second;
+        if (currentScope->findItem(name) != nullptr) {
+            return currentScope->findItem(name);
+        }
+        return nullptr;
+    }
 };
 
-#endif //COMPILER_IRMAKER_H
+#endif //COMPILER_IRSCOPE_H
