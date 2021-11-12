@@ -1137,10 +1137,10 @@ public:
 };
 
 class FuncDef : public AstItem {
-    FuncType *funcType;
-    Token *ident;
-    FuncFParams *funcFParams;
-    Block *block;
+    FuncType *funcType{};
+    Token *ident{};
+    FuncFParams *funcFParams{};
+    Block *block{};
 public:
     void setFuncType(FuncType *funcType);
 

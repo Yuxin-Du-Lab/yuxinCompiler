@@ -232,7 +232,9 @@ void FuncUnaryExp::print(int tab) {
     jsonLikePrint("{", tab);
 
     jsonLikePrint(this->ident->toString(), tab + 1);
-    this->funcRParams->print(tab + 1);
+    if (this->funcRParams != nullptr) {
+        this->funcRParams->print(tab + 1);
+    }
 
     jsonLikePrint("}", tab);
 }
@@ -510,7 +512,9 @@ void FuncDef::print(int tab) {
 
     jsonLikePrint(this->ident->toString(), tab + 1);
     this->funcType->print(tab + 1);
-    this->funcFParams->print(tab + 1);
+    if (this->funcFParams != nullptr) {
+        this->funcFParams->print(tab + 1);
+    }
     this->block->print(tab + 1);
 
     jsonLikePrint("}", tab);

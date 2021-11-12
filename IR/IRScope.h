@@ -20,6 +20,7 @@ class IRSymbolTable;
 
 class IRSymbolItem {
     std::string name;
+    int scopeId = -1;
 public:
     IRSymbolItem(std::string identIn) {
         this->name = identIn;
@@ -27,6 +28,14 @@ public:
 
     std::string getName() {
         return this->name;
+    }
+
+    void setScope(int scopeIn) {
+        this->scopeId = scopeIn;
+    }
+
+    int getScope() {
+        return this->scopeId;
     }
 
     virtual int getType() {
@@ -206,6 +215,7 @@ public:
     }
 
     void addItem(IRSymbolItem *item) {
+        item->setScope(this->scopeId);
         this->records.emplace(item->getName(), item);
     }
 
@@ -261,6 +271,14 @@ public:
             return currentScope->findItem(name);
         }
         return nullptr;
+    }
+
+    int findScope4name(std::string name) {
+        auto *item = findItemFromTable(name);
+        if (item != nullptr) {
+            return item->getScope();
+        }
+        return -1;
     }
 };
 
