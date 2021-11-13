@@ -16,7 +16,7 @@ const int LINELENGTH = 1024 * 1024;
 std::vector<Token> worldsAnalyse (std::ifstream &fileRead);
 bool isNumberChar (char c);
 void checkList(std::vector<Token> wordList);
-//int getFormString(const char bufferLine[], int pointer, std::string *value);
+//int getFormString(const char bufferLine[], int pointer, std::string *rVal);
 std::string getFormString(const char bufferLine[], int *pointer);
 int getConstInteger(char bufferLine[], int pointer, std::string *value);
 bool isAlphaChar (char c);

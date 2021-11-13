@@ -64,7 +64,7 @@ std::vector<Token> worldsAnalyse(std::ifstream &fileRead) {
                         break;
                     case '"':
                         identity = STRCON;
-//                        pointer = getFormString(bufferLine, pointer + 1, &value);
+//                        pointer = getFormString(bufferLine, pointer + 1, &rVal);
                         value = getFormString(bufferLine, &pointer);
                         break;
                     case '{':
@@ -482,7 +482,7 @@ int getINT(char bufferLine[], int pointer) {
     return pointer;
 }
 
-//int getFormString(const char bufferLine[], int pointer, std::string *value) {
+//int getFormString(const char bufferLine[], int pointer, std::string *rVal) {
 std::string getFormString(const char bufferLine[], int *pointer) {
 //    const int formStringBegin = *pointer - 1;
 //    std::string formatString;
@@ -499,8 +499,8 @@ std::string getFormString(const char bufferLine[], int *pointer) {
     std::string str(buf);
 //    formatString = &bufferLine[formStringBegin];
 //    formatString = formatString.substr(0, pointer - formStringBegin + 1);
-//    *value = formatString;
-//    *value = buf;
+//    *rVal = formatString;
+//    *rVal = buf;
     return str;
 }
 

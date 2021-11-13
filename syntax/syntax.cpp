@@ -762,7 +762,7 @@ EqExp *getEqExp(std::vector<Token> &wordList, int *pointer) {
 
     auto *relExp = getRelExp(wordList, pointer);
 
-//      set first value to root
+//      set first rVal to root
     root->setLeafValue(relExp);
     root->setIsLeaf(true);
 
@@ -778,7 +778,7 @@ EqExp *getEqExp(std::vector<Token> &wordList, int *pointer) {
         writeFile4syntax("EqExp");
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
-//        get new value
+//        get new rVal
         relExp = getRelExp(wordList, pointer);
         auto newValue = new EqOpTree();
         newValue->setIsLeaf(true);
@@ -798,7 +798,7 @@ RelExp *getRelExp(std::vector<Token> &wordList, int *pointer) {
     auto *root = new RelOpTree();
     auto *addExp = getAddExp(wordList, pointer);
 
-//      set first value to root
+//      set first rVal to root
     root->setIsLeaf(true);
     root->setLeafValue(addExp);
 
@@ -818,7 +818,7 @@ RelExp *getRelExp(std::vector<Token> &wordList, int *pointer) {
         writeFile4syntax("RelExp");
         writeFile4syntax(wordList[(*pointer)]);
         (*pointer)++;
-//        get new value
+//        get new rVal
         addExp = getAddExp(wordList, pointer);
         auto *newValue = new RelOpTree();
         newValue->setIsLeaf(true);
@@ -837,7 +837,7 @@ AddExp *getAddExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
     auto *addExpptr = new AddExp();
     auto *root = new AddOpTree();
     auto *mulExp = getMulExp(wordList, pointer, scanning);
-//      set first value to root
+//      set first rVal to root
     root->setIsLeaf(true);
     root->serValue(mulExp);
 
@@ -855,7 +855,7 @@ AddExp *getAddExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
         writeFile4syntax("AddExp", scanning);
         writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-//        get new value
+//        get new rVal
         mulExp = getMulExp(wordList, pointer, scanning);
         auto *newValue = new AddOpTree();
         newValue->setIsLeaf(true);
@@ -875,7 +875,7 @@ MulExp *getMulExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
     auto *root = new MulOpTree();
     auto *unaryExp = getUnaryExp(wordList, pointer, scanning);
 
-//      set first value to root
+//      set first rVal to root
     root->setIsLeaf(true);
     root->serValue(unaryExp);
 
@@ -894,7 +894,7 @@ MulExp *getMulExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
         writeFile4syntax("MulExp", scanning);
         writeFile4syntax(wordList[(*pointer)], scanning);
         (*pointer)++;
-//        get new value
+//        get new rVal
         unaryExp = getUnaryExp(wordList, pointer, scanning);
         auto *newValue = new MulOpTree();
         newValue->setIsLeaf(true);

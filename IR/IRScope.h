@@ -133,9 +133,14 @@ public:
 
 class FuncIRItem : public IRSymbolItem {
     int paraNum;
+    std::vector<std::string> tmpVars;
 public:
     FuncIRItem(std::string identIn, int paraNumIn) : IRSymbolItem(std::move(identIn)) {
         this->paraNum = paraNumIn;
+    }
+
+    std::vector<std::string> getTmpVars() {
+        return this->tmpVars;
     }
 
     int getType() override {
@@ -148,6 +153,23 @@ public:
 
     int getParaNum() {
         return this->paraNum;
+    }
+
+    void addTmpVar(std::string tmp) {
+        for (auto iter : this->tmpVars) {
+            if (iter == tmp) {
+                return;
+            }
+        }
+        this->tmpVars.emplace_back(tmp);
+    }
+
+    void checkTmpVars() {
+        std::cout << "checkTmpVars for func" << std::endl;
+        for (auto iter : this->tmpVars) {
+            std::cout << iter << std::endl;
+        }
+        std::cout << "check end" << std::endl;
     }
 };
 
@@ -232,10 +254,19 @@ class IRSymbolTable {
     int temporaryScopeId;
     int scopeCnt;
     std::unordered_map<int, IRScope *> IRTable;
+    FuncIRItem *currentFunc{};
 public:
     IRSymbolTable() {
         this->temporaryScopeId = -1;
         this->scopeCnt = 0;
+    }
+
+    void setCurrentFunc(FuncIRItem *item) {
+        this->currentFunc = item;
+    }
+
+    FuncIRItem *getCurrentFunc() {
+        return this->currentFunc;
     }
 
     int enterNewScope();

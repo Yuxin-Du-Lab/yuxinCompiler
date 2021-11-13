@@ -181,6 +181,10 @@ public:
         this->row = rowIn;
     }
 
+    std::string toString() {
+        return this->name + "#" + std::to_string(this->scopeId);
+    }
+
     void makeIR() override {
 //        if (this->row == 0) {
 //            IRFile
@@ -315,43 +319,48 @@ public:
 };
 
 class StackPushQ : public QuaternionItem {
-    std::string value;
+    std::string rVal;
 public:
     StackPushQ(std::string valueIn) {
-        this->value = std::move(valueIn);
+        this->rVal = std::move(valueIn);
     }
 
     void makeIR() override {
         IRFile
                 << "^push "
-                << this->value
+                << this->rVal
                 << std::endl;
     }
 };
 
 class StackPopQ : public QuaternionItem {
-    int popNum;
+//    int popNum;
+    std::string lVal;
 public:
-    StackPopQ(int num) {
-        this->popNum = num;
+//    StackPopQ(int num) {
+//        this->popNum = num;
+//    }
+    StackPopQ(std::string lValIn) {
+        this->lVal = lValIn;
     }
 
     void makeIR() override {
         IRFile
                 << "^pop "
-                << this->popNum
+//                << this->popNum
+                << this->lVal
                 << std::endl;
     }
 };
 
-class LoadRaFromStackQ : public QuaternionItem {
-public:
-    void makeIR() override {
-        IRFile
-                << "^load ra from stack top"
-                << std::endl;
-    }
-};
+//class LoadRaFromStackQ : public QuaternionItem {
+//public:
+//    void makeIR() override {
+//        IRFile
+//                << "^load ra from stack top"
+//                << std::endl;
+//    }
+//};
 
 class FuncCallQ : public QuaternionItem {
     std::string name;

@@ -20,7 +20,7 @@ Token::Token(std::string &name, int lineNum) {
 
 std::string Token::toString() {
     return this->identity + " " + this->value;
-//    return this->identity + " " + this->value + " " + std::to_string(this->line);
+//    return this->identity + " " + this->rVal + " " + std::to_string(this->line);
 }
 
 std::string Token::getIdentity() {

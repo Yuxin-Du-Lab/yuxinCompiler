@@ -21,6 +21,9 @@ auto *table = new IRSymbolTable();
 std::vector<QuaternionItem *> quaternions;
 
 std::string toTmpVar(int t) {
+    if (table->getCurrentFunc() != nullptr) {
+        table->getCurrentFunc()->addTmpVar("%" + std::to_string(t));
+    }
     return "%" + std::to_string(t);
 }
 
@@ -81,11 +84,11 @@ int CompUnit::makeIR() {
     inMain = false;
     printIR("exit");
     auto *exitQ = new ExitQ();
-    quaternions.emplace_back((QuaternionItem*)exitQ);
+    quaternions.emplace_back((QuaternionItem *) exitQ);
 
     table->exitScope();
     table->check();
-    for (auto IRIter : quaternions) {
+    for (auto IRIter: quaternions) {
         IRIter->makeIR();
     }
 }
@@ -101,7 +104,7 @@ int ConstDecl::makeIR() {
 
 int ConstDef::makeIR() {
     if (this->row == 0) {
-        // simple value
+        // simple rVal
         auto *item = new ConstVarIRItem(this->ident->getKey(), this->constInitVal->getValue());
         table->addItem4currentScope(item);
 
@@ -305,7 +308,7 @@ int InitVal::makeIR(int index, bool isArr, Token *ident) {
             int initT = this->exp->makeIR();
 
             int scope = table->findScope4name(ident->getKey());
-            auto *arrAssign = new ArrAssignQ(ident->getKey()+"#"+ std::to_string(scope),
+            auto *arrAssign = new ArrAssignQ(ident->getKey() + "#" + std::to_string(scope),
                                              std::to_string(index),
                                              toTmpVar(initT));
             quaternions.emplace_back((QuaternionItem *) arrAssign);
@@ -332,17 +335,16 @@ int Exp::makeIR() {
  */
 
 int FuncDef::makeIR() {
+    FuncIRItem *funcIrItem{};
     if (this->funcFParams != nullptr) {
-        auto *item = new FuncIRItem(this->ident->getKey(), this->funcFParams->getFParamNum());
-        table->addItem4currentScope(item);
+        funcIrItem = new FuncIRItem(this->ident->getKey(), this->funcFParams->getFParamNum());
     } else {
-        auto *item = new FuncIRItem(this->ident->getKey(), 0);
-        table->addItem4currentScope(item);
+        funcIrItem = new FuncIRItem(this->ident->getKey(), 0);
     }
-
+    table->addItem4currentScope(funcIrItem);
 
     table->enterNewScope();
-
+    table->setCurrentFunc(funcIrItem);
     int paraNum = 0;
     if (this->funcFParams != nullptr) {
         paraNum = this->funcFParams->getFParamNum();
@@ -358,8 +360,12 @@ int FuncDef::makeIR() {
     }
     this->block->makeIR(true);
     auto *jumpBackQ = new BranchQ(JUMP_REGISTER, "ra");
-    quaternions.emplace_back((QuaternionItem*)jumpBackQ);
+    quaternions.emplace_back((QuaternionItem *) jumpBackQ);
+
+    table->getCurrentFunc()->checkTmpVars();
+    table->setCurrentFunc(nullptr);
     table->exitScope();
+
 }
 
 int FuncFParams::makeIR() {
@@ -387,9 +393,21 @@ int FuncFParam::makeIR() {
     }
     auto *paraDeclQ = new ParaDeclQ(this->ident->getKey(), table->getCurrentScopeId(), this->row);
     quaternions.emplace_back((QuaternionItem *) paraDeclQ);
+    table->getCurrentFunc()->addTmpVar(paraDeclQ->toString());
 }
 
 int FuncUnaryExp::makeIR() {
+    FuncIRItem *funcIrItem = table->getCurrentFunc();
+    std::vector<std::string> vars2pop;
+    if (funcIrItem != nullptr) {
+        vars2pop = funcIrItem->getTmpVars();
+        for (auto tmp: funcIrItem->getTmpVars()) {
+            auto *pushStack = new StackPushQ(tmp);
+            quaternions.emplace_back((QuaternionItem *) pushStack);
+            printIR("push " + tmp);
+        }
+    }
+
     if (this->funcRParams != nullptr) {
         this->funcRParams->makeIR();
     }
@@ -412,15 +430,29 @@ int FuncUnaryExp::makeIR() {
     quaternions.emplace_back((QuaternionItem *) getRet);
     printIR(toTmpVar(ret) + " = ret");
 
-    auto *loadRaQ = new LoadRaFromStackQ();
-    quaternions.emplace_back((QuaternionItem *) loadRaQ);
-    printIR("load ra from stackTop");
-
+//    auto *loadRaQ = new LoadRaFromStackQ();
+//    quaternions.emplace_back((QuaternionItem *) loadRaQ);
+//    printIR("load ra from stackTop");
 
     auto *funcIRItem = (FuncIRItem *) table->findItemFromTable(this->ident->getKey());
-    auto *popStackQ = new StackPopQ(funcIRItem->getParaNum() + 1);
+
+    auto *popStackQ = new StackPopQ("ra");
     quaternions.emplace_back((QuaternionItem *) popStackQ);
-    printIR("pop stack " + std::to_string(funcIRItem->getParaNum() + 1));
+    printIR("pop stack -> ra");
+    for (int i = 0; i < funcIRItem->getParaNum(); i++) {
+        auto *popStackQ = new StackPopQ("$0");
+        quaternions.emplace_back((QuaternionItem *) popStackQ);
+        printIR("pop stack -> $0");
+    }
+//    printIR("pop stack " + std::to_string(funcIRItem->getParaNum() + 1));
+
+    if (funcIrItem != nullptr) {
+        for (int i = vars2pop.size() - 1; i >= 0; i--) {
+            auto *popStackQ = new StackPopQ(vars2pop[i]);
+            quaternions.emplace_back((QuaternionItem *) popStackQ);
+            printIR("pop stack ->aaa " + vars2pop[i]);
+        }
+    }
 
     return ret;
 }
@@ -475,7 +507,7 @@ int LValStmt::makeIR() {
         int indexT = this->lVal->getExp(0)->makeIR();
 
         int scope = table->findScope4name(this->lVal->getIdent()->getKey());
-        auto *arrAssignQ = new ArrAssignQ(this->lVal->getIdent()->getKey()+"#"+ std::to_string(scope),
+        auto *arrAssignQ = new ArrAssignQ(this->lVal->getIdent()->getKey() + "#" + std::to_string(scope),
                                           toTmpVar(indexT),
                                           toTmpVar(expT));
         quaternions.emplace_back((QuaternionItem *) arrAssignQ);
@@ -498,7 +530,7 @@ int LValStmt::makeIR() {
         printIR(toTmpVar(indexT) + " = " + toTmpVar(t1) + " + " + toTmpVar(indexT2));
 
         int scope = table->findScope4name(this->lVal->getIdent()->getKey());
-        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey()+"#"+ std::to_string(scope),
+        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey() + "#" + std::to_string(scope),
                                          toTmpVar(indexT),
                                          toTmpVar(expT));
         quaternions.emplace_back((QuaternionItem *) arrAssign);
@@ -599,11 +631,11 @@ int ReturnStmt::makeIR() {
     }
     if (!inMain) {
         auto *jRa = new BranchQ(JUMP_REGISTER, "ra");
-        quaternions.emplace_back((QuaternionItem*)jRa);
+        quaternions.emplace_back((QuaternionItem *) jRa);
         printIR(JUMP + " ra");
     } else {
         auto *exit = new ExitQ();
-        quaternions.emplace_back((QuaternionItem*)exit);
+        quaternions.emplace_back((QuaternionItem *) exit);
         printIR("exit");
     }
 }
@@ -623,7 +655,7 @@ int GetintStmt::makeIR() {
         int indexT = this->lVal->getExp(0)->makeIR();
 
         int scope = table->findScope4name(this->lVal->getIdent()->getKey());
-        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey()+"#"+ std::to_string(scope),
+        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey() + "#" + std::to_string(scope),
                                          toTmpVar(indexT),
                                          "^GETINT_RET");
         quaternions.emplace_back((QuaternionItem *) arrAssign);
@@ -646,7 +678,7 @@ int GetintStmt::makeIR() {
         printIR(toTmpVar(indexT) + " = " + toTmpVar(t1) + " + " + toTmpVar(indexT2));
 
         int scope = table->findScope4name(this->lVal->getIdent()->getKey());
-        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey()+"#"+ std::to_string(scope),
+        auto *arrAssign = new ArrAssignQ(this->lVal->getIdent()->getKey() + "#" + std::to_string(scope),
                                          toTmpVar(indexT),
                                          "^GETINT_RET");
         quaternions.emplace_back((QuaternionItem *) arrAssign);
@@ -767,9 +799,9 @@ int LVal::makeIR() {
     if (item != nullptr) {
         if (item->getType() == ConstVarIRItemType) {
             int lValT = tmpVar++;
-            auto *varAssign = new VarAssignQ(toTmpVar(lValT), std::to_string(((ConstVarIRItem*)item)->getValue()));
-            quaternions.emplace_back((QuaternionItem*)varAssign);
-            printIR(toTmpVar(lValT) + " = " + std::to_string(((ConstVarIRItem*)item)->getValue()));
+            auto *varAssign = new VarAssignQ(toTmpVar(lValT), std::to_string(((ConstVarIRItem *) item)->getValue()));
+            quaternions.emplace_back((QuaternionItem *) varAssign);
+            printIR(toTmpVar(lValT) + " = " + std::to_string(((ConstVarIRItem *) item)->getValue()));
             return lValT;
         }
     }
@@ -779,7 +811,7 @@ int LVal::makeIR() {
 
             int rValScope = table->findScope4name(this->ident->getKey());
             auto *varAssignQ = new VarAssignQ(toTmpVar(lValT),
-                                              this->ident->getKey()+"#"+ std::to_string(rValScope));
+                                              this->ident->getKey() + "#" + std::to_string(rValScope));
             quaternions.emplace_back((QuaternionItem *) varAssignQ);
             printIR(toTmpVar(lValT) + " = " + this->ident->getKey());
             return lValT;
@@ -788,7 +820,7 @@ int LVal::makeIR() {
             int lValT = tmpVar++;
 
             int scopeArr = table->findScope4name(this->ident->getKey());
-            auto *getArrQ = new GetArrQ(this->ident->getKey()+"#"+ std::to_string(scopeArr),
+            auto *getArrQ = new GetArrQ(this->ident->getKey() + "#" + std::to_string(scopeArr),
                                         toTmpVar(index1T),
                                         toTmpVar(lValT));
             quaternions.emplace_back((QuaternionItem *) getArrQ);
@@ -808,24 +840,24 @@ int LVal::makeIR() {
             int t1 = tmpVar++;
 
             auto *expQ1 = new ExpQ("*", toTmpVar(index1T), std::to_string(row_2), toTmpVar(t1));
-            quaternions.emplace_back((QuaternionItem*)expQ1);
+            quaternions.emplace_back((QuaternionItem *) expQ1);
             printIR(toTmpVar(t1) + " = " + toTmpVar(index1T) + " * " + std::to_string(row_2));
 
             int index2T = this->exps[1]->makeIR();
             int index = tmpVar++;
 
             auto *expQ2 = new ExpQ("+", toTmpVar(t1), toTmpVar(index2T), toTmpVar(index));
-            quaternions.emplace_back((QuaternionItem*)expQ2);
+            quaternions.emplace_back((QuaternionItem *) expQ2);
             printIR(toTmpVar(index) + " = " + toTmpVar(t1) + " + " + toTmpVar(index2T));
 
 
             int lValT = tmpVar++;
 
             int scopeArr = table->findScope4name(this->ident->getKey());
-            auto *getArr = new GetArrQ(this->ident->getKey()+"#"+ std::to_string(scopeArr),
+            auto *getArr = new GetArrQ(this->ident->getKey() + "#" + std::to_string(scopeArr),
                                        toTmpVar(index),
                                        toTmpVar(lValT));
-            quaternions.emplace_back((QuaternionItem*)getArr);
+            quaternions.emplace_back((QuaternionItem *) getArr);
             printIR(toTmpVar(lValT) + " = " + this->ident->getKey() +
                     "[" + toTmpVar(index) + "]"
             );
@@ -834,7 +866,7 @@ int LVal::makeIR() {
     } else {
         int lValT = tmpVar++;
         auto *assignQ = new VarAssignQ(toTmpVar(lValT), std::to_string(this->getConstValue()));
-        quaternions.emplace_back((QuaternionItem*)assignQ);
+        quaternions.emplace_back((QuaternionItem *) assignQ);
         printIR(toTmpVar(lValT) + " = " + std::to_string(this->getConstValue()));
         return lValT;
     }
