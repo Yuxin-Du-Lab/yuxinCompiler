@@ -206,6 +206,10 @@ public:
             std::cout << "<ParaArrIRItem> " << this->getName() << "[][" << std::to_string(this->row2_row) << "]" << std::endl;
         }
     }
+
+    int getRow2_row() {
+        return this->row2_row;
+    }
 };
 
 /*

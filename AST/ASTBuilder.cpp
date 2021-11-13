@@ -394,6 +394,9 @@ int ConstInitVal::getValue(int row1, int row2)  {
             setValues();
         }
         if (this->constDef->getRow() == 1) {
+            if (this->values.empty()) {
+                return 0;
+            }
             return this->values[row1];
         } else if (this->constDef->getRow() == 2) {
             return this->values[row1 * this->constDef->getConstExp(1)->getConstValue() + row2];

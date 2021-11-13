@@ -124,7 +124,7 @@ void ConstInitVal::print(int tab) {
     jsonLikePrint("ConstInitVal", tab);
     jsonLikePrint("{", tab);
 
-    if (this->row == 0) {
+    if (this->row == 0 && this->constExp != nullptr) {
         this->constExp->print(tab + 1);
     } else {
         for (auto iter: this->constInitVals) {

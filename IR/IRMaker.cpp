@@ -143,6 +143,9 @@ int ConstDef::makeIR() {
                 "[" + std::to_string(this->getConstExp(1)->getConstValue()) + "]");
         this->constInitVal->makeIR(0, true, this->ident);
     }
+    if (table->getCurrentFunc() != nullptr) {
+        table->getCurrentFunc()->addTmpVar(this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId()));
+    }
 }
 
 int ConstInitVal::makeIR(int index, bool isArr, Token *ident) {
@@ -299,6 +302,9 @@ int VarDef::makeIR() {
                 this->initVal->makeIR(0, true, this->ident);
             }
         }
+    }
+    if (table->getCurrentFunc() != nullptr) {
+        table->getCurrentFunc()->addTmpVar(this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId()));
     }
 }
 
@@ -793,7 +799,14 @@ int RelOpTree::makeIR() {
         return resT;
     }
 }
-
+// TODO a[][] use a[x]
+/* if d=0, used=0 : var
+ * if d=1, used=0 : arr[]
+ * if d=1, used=1 : var
+ * if d=2, used=0 : arr[][x]
+ * if d=2, used=1 : arr[]
+ * if d=2, used=2 : var
+ */
 int LVal::makeIR() {
     auto *item = table->findItemFromTable(this->ident->getKey());
     if (item != nullptr) {
@@ -806,6 +819,7 @@ int LVal::makeIR() {
         }
     }
     if (this->constValue == VALUE_ERROR) {
+//        origen
         if (this->usedDimension == 0) {
             int lValT = tmpVar++;
 
@@ -816,16 +830,51 @@ int LVal::makeIR() {
             printIR(toTmpVar(lValT) + " = " + this->ident->getKey());
             return lValT;
         } else if (this->usedDimension == 1) {
-            int index1T = this->exps[0]->makeIR();
-            int lValT = tmpVar++;
+            if (this->dimension == 2) {
+                int indexT = this->exps[0]->makeIR();
+                int scopeArr = table->findScope4name(this->ident->getKey());
+                auto *item = table->findItemFromTable(this->getIdent()->getKey());
+                int row_2 = -1;
+                if (item->getType() == ArrIRItemType) {
+                    row_2 = ((ArrIRItem *)item)->getRow_2();
+                } else if (item->getType() == ParaArrItemType) {
+                    row_2 = ((ParaArrIRItem *)item)->getRow2_row();
+                }
 
-            int scopeArr = table->findScope4name(this->ident->getKey());
-            auto *getArrQ = new GetArrQ(this->ident->getKey() + "#" + std::to_string(scopeArr),
-                                        toTmpVar(index1T),
-                                        toTmpVar(lValT));
-            quaternions.emplace_back((QuaternionItem *) getArrQ);
-            printIR(toTmpVar(lValT) + " = " + this->ident->getKey() + "[" + toTmpVar(index1T) + "]");
-            return lValT;
+
+                int offsetT = tmpVar++;
+
+                auto *expQ1 = new ExpQ("*",
+                                       toTmpVar(indexT),
+                                       std::to_string(row_2),
+                                       toTmpVar(offsetT));
+                quaternions.emplace_back((QuaternionItem *) expQ1);
+                printIR(toTmpVar(offsetT) + " = " +
+                        toTmpVar(indexT) + " * " + std::to_string(row_2));
+
+
+                int lValT = tmpVar++;
+                auto *expQ2 = new ExpQ("+",
+                                       toTmpVar(offsetT),
+                                       this->getIdent()->getKey() + "#" + std::to_string(scopeArr),
+                                       toTmpVar(lValT));
+                quaternions.emplace_back((QuaternionItem *) expQ2);
+                printIR(toTmpVar(lValT) + " = " +
+                        this->getIdent()->getKey() + " + " + toTmpVar(offsetT));;
+
+                return lValT;
+            } else {
+                int index1T = this->exps[0]->makeIR();
+                int lValT = tmpVar++;
+
+                int scopeArr = table->findScope4name(this->ident->getKey());
+                auto *getArrQ = new GetArrQ(this->ident->getKey() + "#" + std::to_string(scopeArr),
+                                            toTmpVar(index1T),
+                                            toTmpVar(lValT));
+                quaternions.emplace_back((QuaternionItem *) getArrQ);
+                printIR(toTmpVar(lValT) + " = " + this->ident->getKey() + "[" + toTmpVar(index1T) + "]");
+                return lValT;
+            }
         } else if (this->usedDimension == 2) {
             auto *item = table->findItemFromTable(this->ident->getKey());
             int row_2 = -1;
@@ -834,6 +883,8 @@ int LVal::makeIR() {
                     row_2 = ((ArrIRItem *) item)->getRow_2();
                 } else if (item->getType() == ConstArrIRItemType) {
                     row_2 = ((ConstArrIRItem *) item)->getRow_2();
+                } else if (item->getType() == ParaArrItemType) {
+                    row_2 = ((ParaArrIRItem*)item)->getRow2_row();
                 }
             }
             int index1T = this->exps[0]->makeIR();
