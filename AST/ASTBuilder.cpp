@@ -3,7 +3,7 @@
 //
 
 #include "ASTBuilder.h"
-#include "../symbolTable/symbol.h"
+
 
 void CompUnit::addConstDecl(ConstDecl *constDecl) {
     this->constDecls.emplace_back(constDecl);
@@ -386,7 +386,7 @@ int LValPrimaryExp::getConstValue() {
     return this->lVal->getConstValue();
 }
 
-int ConstInitVal::getValue(int row1, int row2)  {
+int ConstInitVal::getSpecificValue(int row1, int row2)  {
     if (this->constExp != nullptr) {
         return this->constExp->getConstValue();
     } else {

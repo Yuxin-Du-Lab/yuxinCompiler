@@ -3,12 +3,12 @@
 //
 
 #include "../AST/ASTBuilder.h"
-#include "../symbolTable/symbol.h"
 #include "unordered_map"
 #include "IRScope.h"
 #include "IRQuaternion.h"
 
-std::ofstream IRFilePre("IRResPre.txt");
+//std::ofstream IRFilePre("IRResPre.txt");
+
 std::vector<int> while_heads;
 std::vector<int> while_ends;
 std::unordered_map<std::string, int> func2label;
@@ -17,8 +17,11 @@ int tmpVar = 0;
 int labelCnt = 0;
 bool inMain = false;
 
-auto *table = new IRSymbolTable();
+int formatCnt = 0;
 std::vector<QuaternionItem *> quaternions;
+std::vector<std::string> formatStrings;
+
+auto *table = new IRSymbolTable();
 
 std::string toTmpVar(int t) {
     if (table->getCurrentFunc() != nullptr) {
@@ -36,7 +39,7 @@ std::string toLabel(int labelIn, bool isDefine = false) {
 }
 
 void printIR(std::string format) {
-    IRFilePre << format << std::endl;
+//    IRFilePre << format << std::endl;
 }
 
 int CompUnit::makeIR() {
@@ -105,13 +108,13 @@ int ConstDecl::makeIR() {
 int ConstDef::makeIR() {
     if (this->row == 0) {
         // simple rVal
-        auto *item = new ConstVarIRItem(this->ident->getKey(), this->constInitVal->getValue());
+        auto *item = new ConstVarIRItem(this->ident->getKey(), this->constInitVal->getSpecificValue());
         table->addItem4currentScope(item);
 
         auto *constVarDeclQ = new ConstVarDeclQ(this->ident->getKey(), table->getCurrentScopeId(),
-                                                this->constInitVal->getValue());
+                                                this->constInitVal->getSpecificValue());
         quaternions.emplace_back((QuaternionItem *) constVarDeclQ);
-        printIR("const int " + this->ident->getKey() + " = " + std::to_string(this->constInitVal->getValue()));
+        printIR("const int " + this->ident->getKey() + " = " + std::to_string(this->constInitVal->getSpecificValue()));
     } else if (this->row == 1) {
         auto *item = new ConstArrIRItem(this->ident->getKey(),
                                         this->constExps[0]->getConstValue(),
@@ -339,6 +342,16 @@ int Exp::makeIR() {
 /*
  * func def
  */
+int MainFuncDef::makeIR() {
+    auto *funcIrItem = new FuncIRItem("main", 0);
+    table->addItem4currentScope(funcIrItem);
+    table->enterNewScope();
+    table->setCurrentFunc(funcIrItem);
+    int tmp = this->block->makeIR(true);
+    table->getCurrentFunc()->checkTmpVars();
+    table->exitScope();
+    return tmp;
+}
 
 int FuncDef::makeIR() {
     FuncIRItem *funcIrItem{};
@@ -476,13 +489,6 @@ int FuncRParams::makeIR() {
 /*
  * main func
  */
-
-int MainFuncDef::makeIR() {
-    table->enterNewScope();
-    int tmp = this->block->makeIR(true);
-    table->exitScope();
-    return tmp;
-}
 
 int Block::makeIR(bool isFuncBlock) {
     if (!isFuncBlock) {
@@ -701,9 +707,11 @@ int PrintfStmt::makeIR() {
         if (origin[i] == '%') {
             buf = origin.substr(begin, len);
             if (buf.length() > 0) {
-                auto *callPrint = new CallPrintQ(buf, false);
+                auto *callPrint = new CallPrintQ(buf, false, formatCnt);
                 quaternions.emplace_back((QuaternionItem *) callPrint);
                 printIR("print ^" + buf);
+                formatStrings.emplace_back(buf);
+                formatCnt++;
             }
             begin = i + 2;
             len = 0;
@@ -720,9 +728,11 @@ int PrintfStmt::makeIR() {
     }
     buf = origin.substr(begin, len);
     if (buf.length() > 0) {
-        auto *callPrint = new CallPrintQ(buf, false);
+        auto *callPrint = new CallPrintQ(buf, false, formatCnt);
         quaternions.emplace_back((QuaternionItem *) callPrint);
         printIR("print ^" + buf);
+        formatStrings.emplace_back(buf);
+        formatCnt++;
     }
 }
 
@@ -836,9 +846,9 @@ int LVal::makeIR() {
                 auto *item = table->findItemFromTable(this->getIdent()->getKey());
                 int row_2 = -1;
                 if (item->getType() == ArrIRItemType) {
-                    row_2 = ((ArrIRItem *)item)->getRow_2();
+                    row_2 = ((ArrIRItem *) item)->getRow_2();
                 } else if (item->getType() == ParaArrItemType) {
-                    row_2 = ((ParaArrIRItem *)item)->getRow2_row();
+                    row_2 = ((ParaArrIRItem *) item)->getRow2_row();
                 }
 
 
@@ -884,7 +894,7 @@ int LVal::makeIR() {
                 } else if (item->getType() == ConstArrIRItemType) {
                     row_2 = ((ConstArrIRItem *) item)->getRow_2();
                 } else if (item->getType() == ParaArrItemType) {
-                    row_2 = ((ParaArrIRItem*)item)->getRow2_row();
+                    row_2 = ((ParaArrIRItem *) item)->getRow2_row();
                 }
             }
             int index1T = this->exps[0]->makeIR();

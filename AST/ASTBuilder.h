@@ -6,11 +6,10 @@
 #define COMPILER_ASTBUILDER_H
 
 #include <fstream>
-#include "iostream"
 #include "vector"
 #include "../token/Token.h"
 
-#define VALUE_ERROR -999
+#define VALUE_ERROR -999999
 #define AstItemType 0
 #define UnaryOpType 1
 #define NumberType 2
@@ -580,8 +579,14 @@ public:
     }
 
     int getConstValue() {
-        return this->constValue;
+        if (this->constValue != VALUE_ERROR) {
+            return this->constValue;
+        } else {
+            return this->getValue();
+        }
     }
+
+    int getValue();
 
     int getDimension() {
         return this->dimension;
@@ -623,6 +628,8 @@ public:
     int getType() override {
         return ExpType;
     }
+
+    int getValueInGlobal();
 };
 
 
@@ -630,6 +637,7 @@ class InitVal : public AstItem {
     Exp *exp{};
     int row;
     std::vector<InitVal *> initVals;
+    std::vector<int> values;
 public:
     void setExp(Exp *exp);
 
@@ -643,6 +651,40 @@ public:
 
     int getType() override {
         return InitValType;
+    }
+
+    int getValue() {
+        if (this->exp != nullptr) {
+            return this->exp->getValueInGlobal();
+        }
+        return VALUE_ERROR;
+    }
+
+    void setValues() {
+        for (auto iter: this->initVals) {
+            std::vector<int> subValues = iter->initValues();
+            this->values.insert(this->values.end(), subValues.begin(), subValues.end());
+        }
+    }
+
+    std::vector<int> initValues() {
+        std::vector<int> tmpValues;
+        if (this->exp != nullptr) {
+            tmpValues.emplace_back(this->exp->getValueInGlobal());
+        } else {
+            for (auto iter: this->initVals) {
+                std::vector<int> subValues = iter->initValues();
+                tmpValues.insert(tmpValues.end(), subValues.begin(), subValues.end());
+            }
+        }
+        return tmpValues;
+    }
+
+    std::vector<int> getValues() {
+        if (this->values.empty()) {
+            this->setValues();
+        }
+        return this->values;
     }
 };
 
@@ -702,6 +744,8 @@ public:
     int getType() override {
         return VarDefType;
     }
+
+    void storeGlobalValues();
 };
 
 
@@ -717,6 +761,8 @@ public:
     int getType() override {
         return VarDeclType;
     }
+
+    void storeGlobalValues();
 };
 
 class ConstInitVal : public AstItem {
@@ -758,7 +804,14 @@ public:
         return tmpValues;
     }
 
-    int getValue(int row1 = 0, int row2 = 0);
+    std::vector<int> getValues() {
+        if (values.empty()) {
+            this->setValues();
+        }
+        return this->values;
+    }
+
+    int getSpecificValue(int row1 = 0, int row2 = 0);
 
     int makeIR(int index = 0, bool isArr = false, Token *ident = nullptr);
 
@@ -770,11 +823,11 @@ public:
         return ConstInitValType;
     }
 
-    std::vector<int> getValues() {
-        if (values.empty()) {
-            this->setValues();
+    int getValue() {
+        if (this->constExp != nullptr) {
+            return this->constExp->getConstValue();
         }
-        return this->values;
+        return VALUE_ERROR;
     }
 };
 
@@ -815,6 +868,8 @@ public:
     int getType() override {
         return ConstDefType;
     }
+
+    void storeGlobalValues();
 };
 
 class ConstDecl : public AstItem {
@@ -829,6 +884,8 @@ public:
     int getType() override {
         return ConstDeclType;
     }
+
+    void storeGlobalValues();
 };
 
 class Block : public AstItem {
@@ -1205,9 +1262,13 @@ public:
 
     int makeIR();
 
+    void _dataMake();
+
     int getType() override {
         return CompUnitType;
     }
+
+    void storeGlobalValues();
 };
 
 #endif //COMPILER_ASTBUILDER_H

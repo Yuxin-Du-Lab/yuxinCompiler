@@ -72,7 +72,7 @@ public:
         this->isConst = isConstIn;
         if (astItem != nullptr && isConstIn) {
             this->constInitVal = ((ConstDef *) astItem)->getConstInitVal();
-            this->value = ((ConstDef *) astItem)->getConstInitVal()->getValue();
+            this->value = ((ConstDef *) astItem)->getConstInitVal()->getSpecificValue();
         }
     };
 
@@ -156,7 +156,7 @@ public:
     }
 
     int getConstValue(int row1In = 0, int row2In = 0) override {
-        return this->constDef->getConstInitVal()->getValue(row1In, row2In);
+        return this->constDef->getConstInitVal()->getSpecificValue(row1In, row2In);
     }
 
     int getRow1() {

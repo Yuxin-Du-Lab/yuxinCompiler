@@ -16,14 +16,17 @@ int main() {
     const bool printLexerRes = true;
     const bool printSyntaxRex = true;
     const bool printASTRes = true;
-    const bool printIRRes = true;
+    const bool printIR_MipsRes = true;
     std::ifstream readLexerFile("testfile.txt");
     std::vector<Token> wordList = worldsAnalyse(readLexerFile);
     if (printLexerRes) writeFile4WordList(wordList);
     auto *compUnit = syntaxAnalysis(wordList, printSyntaxRex);
-
+    compUnit->storeGlobalValues();
     if (printASTRes) compUnit->print(0);
 
-    if (printIRRes) compUnit->makeIR();
+    if (printIR_MipsRes) {
+        compUnit->makeIR();
+        compUnit->_dataMake();
+    }
     return 0;
 }

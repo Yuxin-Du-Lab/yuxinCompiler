@@ -5,10 +5,9 @@
 #ifndef COMPILER_IRQUATERNION_H
 #define COMPILER_IRQUATERNION_H
 
-#include "iostream"
 #include "vector"
+#include "iostream"
 
-std::ofstream IRFile("IRRes.txt");
 
 const std::string BRANCH_EQUAL = "beq";
 const std::string JUMP = "j";
@@ -17,9 +16,9 @@ const std::string JUMP_REGISTER = "jr";
 
 class QuaternionItem {
 public:
-    virtual void makeIR() {
-        IRFile << "^default^" << std::endl;
-    };
+    virtual void makeIR();
+
+    virtual void makeMips();
 };
 
 class ConstVarDeclQ : public QuaternionItem {
@@ -33,16 +32,9 @@ public:
         this->value = init;
     }
 
-    void makeIR() override {
-        IRFile
-                << "const int "
-                << this->name
-                << "#"
-                << this->scopeId
-                << " = "
-                << this->value
-                << std::endl;
-    }
+    void makeIR() override;
+
+    void makeMips() override;
 };
 
 class ConstArrDeclQ : public QuaternionItem {
@@ -58,31 +50,9 @@ public:
         this->values.insert(this->values.end(), inits.begin(), inits.end());
     }
 
-    void makeIR() override {
-        IRFile
-                << "const arr "
-                << this->name
-                << "#"
-                << this->scopeId
-                << "["
-                << this->row
-                << "]"
-                << std::endl;
-//        int index = 0;
-//        for (auto iter: this->values) {
-//            IRFile
-//                    << this->name
-//                    << "#"
-//                    << this->scopeId
-//                    << "["
-//                    << index
-//                    << "]"
-//                    << " = "
-//                    << values[index]
-//                    << std::endl;
-//            index++;
-//        }
-    }
+    void makeIR() override;
+
+    void makeMips() override;
 };
 
 class VarDeclQ : public QuaternionItem {
@@ -101,25 +71,9 @@ public:
         this->scopeId = scopeIdIn;
     }
 
-    void makeIR() override {
-        if (this->rVal.empty()) {
-            IRFile
-                    << "int "
-                    << this->name
-                    << "#"
-                    << this->scopeId
-                    << std::endl;
-        } else {
-            IRFile
-                    << "int "
-                    << this->name
-                    << "#"
-                    << this->scopeId
-                    << " = "
-                    << this->rVal
-                    << std::endl;
-        }
-    }
+    void makeIR() override;
+
+    void makeMips() override;
 };
 
 class ArrDeclQ : public QuaternionItem {
@@ -133,17 +87,7 @@ public:
         this->row = rowIn;
     }
 
-    void makeIR() override {
-        IRFile
-                << "arr int "
-                << this->name
-                << "#"
-                << this->scopeId
-                << "["
-                << this->row
-                << "]"
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class FuncDeclQ : public QuaternionItem {
@@ -157,17 +101,7 @@ public:
         this->paraNum = paraNumIn;
     }
 
-    void makeIR() override {
-        IRFile
-                << "^func "
-                << this->type
-                << " "
-                << this->name
-                << "()"
-                << " "
-                << this->paraNum
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class ParaDeclQ : QuaternionItem {
@@ -185,29 +119,7 @@ public:
         return this->name + "#" + std::to_string(this->scopeId);
     }
 
-    void makeIR() override {
-//        if (this->row == 0) {
-//            IRFile
-//                    << "para int "
-//                    << this->name
-//                    << "#"
-//                    << this->scopeId
-//                    << std::endl;
-//        } else {
-//            IRFile
-//                    << "para arr "
-//                    << this->name
-//                    << "#"
-//                    << this->scopeId
-//                    << std::endl;
-//        }
-        IRFile
-                    << "para int "
-                    << this->name
-                    << "#"
-                    << this->scopeId
-                    << std::endl;
-    }
+    void makeIR() override;
 };
 
 class ExpQ : public QuaternionItem {
@@ -232,27 +144,7 @@ public:
         this->opRel = 1;
     }
 
-    void makeIR() override {
-        if (this->opRel == 2) {
-            IRFile
-                    << this->res
-                    << " = "
-                    << this->arg1
-                    << " "
-                    << this->op
-                    << " "
-                    << this->arg2
-                    << std::endl;
-        } else {
-            IRFile
-                    << this->res
-                    << " = "
-                    << this->op
-                    << " "
-                    << this->arg1
-                    << std::endl;
-        }
-    }
+    void makeIR() override;
 };
 
 class VarAssignQ : public QuaternionItem {
@@ -264,13 +156,7 @@ public:
         this->rVal = std::move(rValIn);
     }
 
-    void makeIR() override {
-        IRFile
-                << this->lVal
-                << " = "
-                << this->rVal
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class ArrAssignQ : public QuaternionItem {
@@ -284,15 +170,7 @@ public:
         this->rVal = std::move(rValIn);
     }
 
-    void makeIR() override {
-        IRFile
-                << this->name
-                << "["
-                << this->offset
-                << "] = "
-                << this->rVal
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class GetArrQ : public QuaternionItem {
@@ -306,16 +184,7 @@ public:
         this->lVal = std::move(lValIn);
     }
 
-    void makeIR() override {
-        IRFile
-                << this->lVal
-                << " = "
-                << this->name
-                << "["
-                << this->offset
-                << "]"
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class StackPushQ : public QuaternionItem {
@@ -325,42 +194,18 @@ public:
         this->rVal = std::move(valueIn);
     }
 
-    void makeIR() override {
-        IRFile
-                << "^push "
-                << this->rVal
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class StackPopQ : public QuaternionItem {
-//    int popNum;
     std::string lVal;
 public:
-//    StackPopQ(int num) {
-//        this->popNum = num;
-//    }
     StackPopQ(std::string lValIn) {
         this->lVal = lValIn;
     }
 
-    void makeIR() override {
-        IRFile
-                << "^pop "
-//                << this->popNum
-                << this->lVal
-                << std::endl;
-    }
+    void makeIR() override;
 };
-
-//class LoadRaFromStackQ : public QuaternionItem {
-//public:
-//    void makeIR() override {
-//        IRFile
-//                << "^load ra from stack top"
-//                << std::endl;
-//    }
-//};
 
 class FuncCallQ : public QuaternionItem {
     std::string name;
@@ -369,12 +214,7 @@ public:
         this->name = std::move(nameIn);
     }
 
-    void makeIR() override {
-        IRFile
-                << "^call func "
-                << this->name
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class GetRetQ : public QuaternionItem {
@@ -384,12 +224,7 @@ public:
         this->lVal = std::move(lVal);
     }
 
-    void makeIR() override {
-        IRFile
-                << this->lVal
-                << " = ^ret"
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class SetRetQ : public QuaternionItem {
@@ -399,12 +234,7 @@ public:
         this->rVal = std::move(rVal);
     }
 
-    void makeIR() override {
-        IRFile
-                << "^ret = "
-                << this->rVal
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class SetLabelQ : QuaternionItem {
@@ -414,12 +244,7 @@ public:
         this->label = std::move(label);
     }
 
-    void makeIR() override {
-        IRFile
-                << this->label
-                << " : "
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class BranchQ : QuaternionItem {
@@ -440,68 +265,31 @@ public:
         this->arg2 = std::move(arg2);
     }
 
-    void makeIR() override {
-        if (this->op == BRANCH_EQUAL) {
-            IRFile
-                    << this->op
-                    << " "
-                    << this->arg1
-                    << " "
-                    << this->arg2
-                    << " "
-                    << this->label
-                    << std::endl;
-        } else {
-            IRFile
-                    << this->op
-                    << " "
-                    << this->label
-                    << std::endl;
-        }
-    }
+    void makeIR() override;
 };
 
 class CallGetIntQ : public QuaternionItem {
 public:
-    void makeIR() override {
-        IRFile
-                << "^call GETINT"
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 class CallPrintQ : public QuaternionItem {
     std::string format;
     bool isPrintNum;
+    int formatIndex;
 public:
-    CallPrintQ(std::string formatIn, bool isNum) {
+    CallPrintQ(std::string formatIn, bool isNum, int formatIndex = -1) {
         this->format = std::move(formatIn);
         this->isPrintNum = isNum;
+        this->formatIndex = formatIndex;
     }
 
-    void makeIR() override {
-        if (isPrintNum) {
-            IRFile
-                    << "^call print "
-                    << this->format
-                    << std::endl;
-        } else {
-            IRFile
-                    << "^call print $"
-                    << this->format
-                    << std::endl;
-        }
-
-    }
+    void makeIR() override;
 };
 
 class ExitQ : public QuaternionItem {
 public:
-    void makeIR() override {
-        IRFile
-                << "exit"
-                << std::endl;
-    }
+    void makeIR() override;
 };
 
 #endif //COMPILER_IRQUATERNION_H

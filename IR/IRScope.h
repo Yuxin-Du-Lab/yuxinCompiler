@@ -16,6 +16,8 @@
 
 #include "vector"
 #include "unordered_map"
+#include "iostream"
+
 class IRSymbolTable;
 
 class IRSymbolItem {
@@ -48,7 +50,7 @@ public:
 };
 
 class VarIRItem : public IRSymbolItem {
-
+    int address;
 public:
     VarIRItem(std::string identIn) : IRSymbolItem(std::move(identIn)) {
 
@@ -86,6 +88,7 @@ public:
 class ArrIRItem : public IRSymbolItem {
     int row;
     int row_2;
+    int address;
 public:
     ArrIRItem(std::string identIn, int rowIn, int row_2In=-1) : IRSymbolItem(std::move(identIn)) {
         this->row = rowIn;
@@ -116,6 +119,10 @@ public:
     ConstArrIRItem(std::string identIn, int rowIn, std::vector<int> valuesIn, int row_2In=-1) : ArrIRItem(std::move(identIn), rowIn, row_2In) {
         this->values.insert(this->values.end(), valuesIn.begin(), valuesIn.end());
         this->row_2 = row_2In;
+    }
+
+    std::vector<int> getValues() {
+        return this->values;
     }
 
     int getType() override {
@@ -165,7 +172,7 @@ public:
     }
 
     void checkTmpVars() {
-        std::cout << "checkTmpVars for func" << std::endl;
+        std::cout << "checkTmpVars for func : " << this->getName() << std::endl;
         for (auto iter : this->tmpVars) {
             std::cout << iter << std::endl;
         }
@@ -252,6 +259,10 @@ public:
     IRSymbolItem *findItem(std::string name);
 
     void check();
+
+    std::unordered_map<std::string, IRSymbolItem *> getRecords() {
+        return this->records;
+    }
 };
 
 class IRSymbolTable {

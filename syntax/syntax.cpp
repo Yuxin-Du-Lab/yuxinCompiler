@@ -677,6 +677,17 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
 //        lVal
         primaryExpptr = new LValPrimaryExp();
         auto *lVal = getLVal(wordList, pointer, scanning);
+        auto *item = symbolTable.findItem(lVal->getIdent()->getKey());
+        if (item != nullptr) {
+            if (item->getType() == VAR_ITEM) {
+                //0 d
+                lVal->setRows();
+            } else if (item->getType() == ARRAY_ITEM_D1) {
+                lVal->setRows(((ArrayItem*)item)->getRow1());
+            } else if (item->getType() == ARRAY_ITEM_D2) {
+                lVal->setRows(((ArrayItem*)item)->getRow1(), ((ArrayItem*)item)->getRow2());
+            }
+        }
         if (gettingConstExp) {
             Item* item = symbolTable.findItem(lVal->getIdent()->getKey());
             if (lVal->getDimension() == 0) {
@@ -1061,7 +1072,7 @@ ConstDef *getConstDef(std::vector<Token> &wordList, int *pointer) {
 
     constDefptr->setConstInitVal(constInitVal);
     constDefptr->setRow(row);
-    constInitVal->getValue();
+    constInitVal->getSpecificValue();
     writeFile4syntax("ConstDef");
     return constDefptr;
 }
