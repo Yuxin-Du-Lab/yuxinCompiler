@@ -1,6 +1,7 @@
 #include "lexer/lexer.h"
 #include "vector"
 #include "syntax/syntax.h"
+#include "mips/mips.h"
 
 void writeFile4WordList(std::vector<Token> wordList) {
     std::ofstream writeLexerFile("LexerRes.txt");
@@ -27,6 +28,7 @@ int main() {
     if (printIR_MipsRes) {
         compUnit->makeIR();
         compUnit->_dataMake();
+        makeMips();
     }
     return 0;
 }

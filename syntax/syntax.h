@@ -7,7 +7,7 @@
 
 #include "../token/Token.h"
 #include "vector"
-#include "../AST/ASTBuilder.h"
+#include "../AST/AST.h"
 
 
 CompUnit *syntaxAnalysis(std::vector<Token> &wordList, bool printSyntaxRex);

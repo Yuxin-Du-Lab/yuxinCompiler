@@ -2,7 +2,7 @@
 // Created by yuxin on 2021/10/16.
 //
 
-#include "../AST/ASTBuilder.h"
+#include "../AST/AST.h"
 
 std::ofstream ASTFile("ASTRes.txt");
 

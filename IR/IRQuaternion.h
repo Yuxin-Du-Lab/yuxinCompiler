@@ -7,7 +7,7 @@
 
 #include "vector"
 #include "iostream"
-
+#include "unordered_map"
 
 const std::string BRANCH_EQUAL = "beq";
 const std::string JUMP = "j";
@@ -25,11 +25,17 @@ class ConstVarDeclQ : public QuaternionItem {
     std::string name;
     int scopeId;
     int value;
+    bool isGlobal;
 public:
-    ConstVarDeclQ(std::string nameIn, int scopeIdIn, int init) {
+    ConstVarDeclQ(std::string nameIn, int scopeIdIn, int init, bool isGlobal = false) {
         this->name = std::move(nameIn);
         this->scopeId = scopeIdIn;
         this->value = init;
+        this->isGlobal = isGlobal;
+    }
+
+    std::string toString() {
+        return this->name + "#" + std::to_string(this->scopeId);
     }
 
     void makeIR() override;
@@ -42,33 +48,39 @@ class ConstArrDeclQ : public QuaternionItem {
     int scopeId;
     int row;
     std::vector<int> values;
+    bool isGlobal;
 public:
-    ConstArrDeclQ(std::string nameIn, int scopeIdIn, int rowIn, std::vector<int> inits) {
+    ConstArrDeclQ(std::string nameIn, int scopeIdIn, int rowIn, std::vector<int> inits, bool isGlobal = false) {
         this->name = std::move(nameIn);
         this->scopeId = scopeIdIn;
         this->row = rowIn;
         this->values.insert(this->values.end(), inits.begin(), inits.end());
+        this->isGlobal = isGlobal;
     }
 
     void makeIR() override;
-
-    void makeMips() override;
 };
 
 class VarDeclQ : public QuaternionItem {
     std::string name;
     int scopeId;
     std::string rVal;
+    bool isGlobal;
 public:
-    VarDeclQ(std::string nameIn, int scopeIdIn, std::string rValIn) {
+    VarDeclQ(std::string nameIn, int scopeIdIn, std::string rValIn, bool isGlobal = false) {
         this->name = std::move(nameIn);
         this->scopeId = scopeIdIn;
         this->rVal = std::move(rValIn);
+        this->isGlobal = isGlobal;
     }
 
-    VarDeclQ(std::string nameIn, int scopeIdIn) {
+    VarDeclQ(std::string nameIn, int scopeIdIn, bool isGlobal = false) {
         this->name = std::move(nameIn);
         this->scopeId = scopeIdIn;
+    }
+
+    std::string toString() {
+        return this->name + "#" + std::to_string(this->scopeId);
     }
 
     void makeIR() override;
@@ -80,11 +92,13 @@ class ArrDeclQ : public QuaternionItem {
     std::string name;
     int scopeId;
     int row;
+    bool isGlobal;
 public:
-    ArrDeclQ(std::string nameIn, int scopeIdIn, int rowIn) {
+    ArrDeclQ(std::string nameIn, int scopeIdIn, int rowIn, bool isGlobal = false) {
         this->name = std::move(nameIn);
         this->scopeId = scopeIdIn;
         this->row = rowIn;
+        this->isGlobal = isGlobal;
     }
 
     void makeIR() override;
@@ -94,6 +108,8 @@ class FuncDeclQ : public QuaternionItem {
     std::string name;
     std::string type;
     int paraNum;
+    std::unordered_map<std::string, int> name2offset4stack;
+    std::unordered_map<std::string, int> name2size4stack;
 public:
     FuncDeclQ(std::string nameIn, std::string typeIn, int paraNumIn) {
         this->name = std::move(nameIn);
@@ -102,6 +118,22 @@ public:
     }
 
     void makeIR() override;
+
+    void initStacksInfo(std::unordered_map<std::string, int> name2offset4stack_init,
+                        std::unordered_map<std::string, int> name2size4stack_init) {
+        this->name2size4stack = name2size4stack_init;
+        this->name2offset4stack = name2offset4stack_init;
+    }
+
+    int getStackSize() {
+        int res = 0;
+        for (auto iter : this->name2size4stack) {
+            res += iter.second;
+        }
+        return res;
+    }
+
+    void makeMips() override;
 };
 
 class ParaDeclQ : QuaternionItem {
@@ -145,6 +177,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class VarAssignQ : public QuaternionItem {
@@ -157,6 +191,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class ArrAssignQ : public QuaternionItem {
@@ -171,6 +207,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class GetArrQ : public QuaternionItem {
@@ -185,16 +223,24 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class StackPushQ : public QuaternionItem {
     std::string rVal;
+    bool isArg;
+    int argNo;
 public:
-    StackPushQ(std::string valueIn) {
+    StackPushQ(std::string valueIn, bool isArg = false, int argNo = -1) {
         this->rVal = std::move(valueIn);
+        this->isArg = isArg;
+        this->argNo = argNo;
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class StackPopQ : public QuaternionItem {
@@ -205,6 +251,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class FuncCallQ : public QuaternionItem {
@@ -215,6 +263,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class GetRetQ : public QuaternionItem {
@@ -225,6 +275,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class SetRetQ : public QuaternionItem {
@@ -235,6 +287,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class SetLabelQ : QuaternionItem {
@@ -245,6 +299,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class BranchQ : QuaternionItem {
@@ -266,11 +322,15 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class CallGetIntQ : public QuaternionItem {
 public:
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class CallPrintQ : public QuaternionItem {
@@ -285,11 +345,15 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class ExitQ : public QuaternionItem {
 public:
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 #endif //COMPILER_IRQUATERNION_H

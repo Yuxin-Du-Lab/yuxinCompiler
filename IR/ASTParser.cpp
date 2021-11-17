@@ -2,12 +2,14 @@
 // Created by yuxin on 2021/11/5.
 //
 
-#include "../AST/ASTBuilder.h"
+#include "../AST/AST.h"
 #include "unordered_map"
 #include "IRScope.h"
 #include "IRQuaternion.h"
 
 //std::ofstream IRFilePre("IRResPre.txt");
+
+extern int mainStackSize;
 
 std::vector<int> while_heads;
 std::vector<int> while_ends;
@@ -32,9 +34,9 @@ std::string toTmpVar(int t) {
 
 std::string toLabel(int labelIn, bool isDefine = false) {
     if (isDefine) {
-        return "&" + std::to_string(labelIn) + ":";
+        return "label" + std::to_string(labelIn) + ":";
     } else {
-        return "&" + std::to_string(labelIn);
+        return "label" + std::to_string(labelIn);
     }
 }
 
@@ -53,6 +55,10 @@ int CompUnit::makeIR() {
         iter->makeIR();
     }
     int mainLabel = labelCnt++;
+
+    auto *callMain = new FuncCallQ("main");
+    quaternions.emplace_back((QuaternionItem *) callMain);
+    printIR("call main");
 
     auto *jump2mainQ = new BranchQ(JUMP, toLabel(mainLabel));
     quaternions.emplace_back((QuaternionItem *) jump2mainQ);
@@ -106,28 +112,43 @@ int ConstDecl::makeIR() {
 }
 
 int ConstDef::makeIR() {
+    FuncIRItem *currentFuncIrItem{};
+    if (table->getCurrentFunc() != nullptr) {
+        currentFuncIrItem = table->getCurrentFunc();
+    }
+    std::string name = this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId());
     if (this->row == 0) {
         // simple rVal
+        if (currentFuncIrItem != nullptr)
+            currentFuncIrItem->addTmpVar(name);
         auto *item = new ConstVarIRItem(this->ident->getKey(), this->constInitVal->getSpecificValue());
         table->addItem4currentScope(item);
 
         auto *constVarDeclQ = new ConstVarDeclQ(this->ident->getKey(), table->getCurrentScopeId(),
-                                                this->constInitVal->getSpecificValue());
+                                                this->constInitVal->getSpecificValue(),
+                                                currentFuncIrItem == nullptr);
         quaternions.emplace_back((QuaternionItem *) constVarDeclQ);
         printIR("const int " + this->ident->getKey() + " = " + std::to_string(this->constInitVal->getSpecificValue()));
     } else if (this->row == 1) {
+        if (currentFuncIrItem != nullptr)
+            currentFuncIrItem->addTmpVar(name, this->constExps[0]->getConstValue());
         auto *item = new ConstArrIRItem(this->ident->getKey(),
                                         this->constExps[0]->getConstValue(),
                                         this->constInitVal->getValues());
         table->addItem4currentScope(item);
 
         auto *constArrDeclQ = new ConstArrDeclQ(this->ident->getKey(), table->getCurrentScopeId(),
-                                                this->getConstExp(0)->getConstValue(), this->constInitVal->getValues());
+                                                this->getConstExp(0)->getConstValue(), this->constInitVal->getValues(),
+                                                currentFuncIrItem == nullptr);
         quaternions.emplace_back((QuaternionItem *) constArrDeclQ);
         printIR("arr const int " + this->ident->getKey() + "[" + std::to_string(this->getConstExp(0)->getConstValue()) +
                 "]");
         this->constInitVal->makeIR(0, true, this->ident);
     } else if (this->row == 2) {
+        if (currentFuncIrItem != nullptr)
+            currentFuncIrItem->addTmpVar(name,
+                                         this->constExps[0]->getConstValue() * this->constExps[1]->getConstValue());
+
         auto *item = new ConstArrIRItem(this->ident->getKey(),
                                         this->constExps[0]->getConstValue() * this->constExps[1]->getConstValue(),
                                         this->constInitVal->getValues(),
@@ -139,15 +160,13 @@ int ConstDef::makeIR() {
                                                 table->getCurrentScopeId(),
                                                 this->getConstExp(0)->getConstValue() *
                                                 this->getConstExp(1)->getConstValue(),
-                                                this->constInitVal->getValues());
+                                                this->constInitVal->getValues(),
+                                                currentFuncIrItem == nullptr);
         quaternions.emplace_back((QuaternionItem *) constArrDeclQ);
         printIR("arr const int " + this->ident->getKey() +
                 "[" + std::to_string(this->getConstExp(0)->getConstValue()) + "]" +
                 "[" + std::to_string(this->getConstExp(1)->getConstValue()) + "]");
         this->constInitVal->makeIR(0, true, this->ident);
-    }
-    if (table->getCurrentFunc() != nullptr) {
-        table->getCurrentFunc()->addTmpVar(this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId()));
     }
 }
 
@@ -260,27 +279,41 @@ int VarDecl::makeIR() {
 }
 
 int VarDef::makeIR() {
+    FuncIRItem *currentFuncIRItem{};
+    if (table->getCurrentFunc() != nullptr) {
+        currentFuncIRItem = table->getCurrentFunc();
+    }
+    std::string name = this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId());
     if (this->row == 0) {
+        if (currentFuncIRItem != nullptr)
+            currentFuncIRItem->addTmpVar(name);
         if (this->hasInitVal) {
             int initT = this->initVal->makeIR();
 
-            auto *varDeclQ = new VarDeclQ(this->ident->getKey(), table->getCurrentScopeId(), toTmpVar(initT));
+            auto *varDeclQ = new VarDeclQ(this->ident->getKey(), table->getCurrentScopeId(), toTmpVar(initT),
+                                          currentFuncIRItem == nullptr);
             quaternions.emplace_back((QuaternionItem *) varDeclQ);
             printIR("var int " + this->ident->getKey() + " = " + toTmpVar(initT));
         } else {
-            auto *varDeclQ = new VarDeclQ(this->ident->getKey(), table->getCurrentScopeId());
+            auto *varDeclQ = new VarDeclQ(this->ident->getKey(), table->getCurrentScopeId(),
+                                          currentFuncIRItem == nullptr);
             quaternions.emplace_back((QuaternionItem *) varDeclQ);
             printIR("var int " + this->ident->getKey());
         }
         auto *item = new VarIRItem(this->ident->getKey());
         table->addItem4currentScope(item);
+
     } else {
         if (this->row == 1) {
+            if (currentFuncIRItem != nullptr)
+                currentFuncIRItem->addTmpVar(name, this->constExps[0]->getConstValue());
+
             auto *item = new ArrIRItem(this->ident->getKey(), this->getConstExp(0)->getConstValue());
             table->addItem4currentScope(item);
 
             auto *arrDecl = new ArrDeclQ(this->ident->getKey(), table->getCurrentScopeId(),
-                                         this->constExps[0]->getConstValue());
+                                         this->constExps[0]->getConstValue(),
+                                         currentFuncIRItem == nullptr);
             quaternions.emplace_back((QuaternionItem *) arrDecl);
             printIR("arr int " + this->ident->getKey() + "[" + std::to_string(this->constExps[0]->getConstValue()) +
                     "]");
@@ -288,6 +321,10 @@ int VarDef::makeIR() {
                 this->initVal->makeIR(0, true, this->ident);
             }
         } else if (this->row == 2) {
+            if (currentFuncIRItem != nullptr)
+                currentFuncIRItem->addTmpVar(name,
+                                             this->constExps[0]->getConstValue() * this->constExps[1]->getConstValue());
+
             auto *item = new ArrIRItem(this->ident->getKey(),
                                        this->getConstExp(0)->getConstValue() * this->getConstExp(1)->getConstValue(),
                                        this->getConstExp(1)->getConstValue()
@@ -296,7 +333,8 @@ int VarDef::makeIR() {
 
             auto *arrDecl = new ArrDeclQ(this->ident->getKey(),
                                          table->getCurrentScopeId(),
-                                         this->constExps[0]->getConstValue() * this->constExps[1]->getConstValue());
+                                         this->constExps[0]->getConstValue() * this->constExps[1]->getConstValue(),
+                                         currentFuncIRItem == nullptr);
             quaternions.emplace_back((QuaternionItem *) arrDecl);
             printIR("arr int " + this->ident->getKey() +
                     "[" + std::to_string(this->constExps[0]->getConstValue()) + "]" +
@@ -305,9 +343,6 @@ int VarDef::makeIR() {
                 this->initVal->makeIR(0, true, this->ident);
             }
         }
-    }
-    if (table->getCurrentFunc() != nullptr) {
-        table->getCurrentFunc()->addTmpVar(this->ident->getKey() + "#" + std::to_string(table->getCurrentScopeId()));
     }
 }
 
@@ -347,7 +382,19 @@ int MainFuncDef::makeIR() {
     table->addItem4currentScope(funcIrItem);
     table->enterNewScope();
     table->setCurrentFunc(funcIrItem);
+
+    auto *mainFuncDeclQ = new FuncDeclQ("main",
+                                        "int",
+                                        0);
+    quaternions.emplace_back((QuaternionItem *) mainFuncDeclQ);
+    printIR("int main()");
+
+
     int tmp = this->block->makeIR(true);
+
+    mainFuncDeclQ->initStacksInfo(funcIrItem->getName2offset4stack(),
+                                  funcIrItem->getName2size4stack());
+    mainStackSize = mainFuncDeclQ->getStackSize();
     table->getCurrentFunc()->checkTmpVars();
     table->exitScope();
     return tmp;
@@ -378,13 +425,14 @@ int FuncDef::makeIR() {
         this->funcFParams->makeIR();
     }
     this->block->makeIR(true);
+    funcDeclQ->initStacksInfo(funcIrItem->getName2offset4stack(),
+                              funcIrItem->getName2size4stack());
     auto *jumpBackQ = new BranchQ(JUMP_REGISTER, "ra");
     quaternions.emplace_back((QuaternionItem *) jumpBackQ);
 
     table->getCurrentFunc()->checkTmpVars();
     table->setCurrentFunc(nullptr);
     table->exitScope();
-
 }
 
 int FuncFParams::makeIR() {
@@ -427,10 +475,6 @@ int FuncUnaryExp::makeIR() {
         }
     }
 
-    if (this->funcRParams != nullptr) {
-        this->funcRParams->makeIR();
-    }
-
     auto *pushStack = new StackPushQ("ra");
     quaternions.emplace_back((QuaternionItem *) pushStack);
     printIR("push ra");
@@ -438,6 +482,10 @@ int FuncUnaryExp::makeIR() {
     auto *callFunc = new FuncCallQ(this->ident->getKey());
     quaternions.emplace_back((QuaternionItem *) callFunc);
     printIR("call " + this->ident->getKey());
+
+    if (this->funcRParams != nullptr) {
+        this->funcRParams->makeIR();
+    }
 
     if (func2label.find(this->ident->getKey()) != func2label.end()) {
         auto *jump = new BranchQ(JUMP_AND_LINK, toLabel(func2label.find(this->ident->getKey())->second));
@@ -455,14 +503,19 @@ int FuncUnaryExp::makeIR() {
 
     auto *funcIRItem = (FuncIRItem *) table->findItemFromTable(this->ident->getKey());
 
-    auto *popStackQ = new StackPopQ("ra");
-    quaternions.emplace_back((QuaternionItem *) popStackQ);
-    printIR("pop stack -> ra");
+    auto *retFunc = new FuncCallQ("^RETURN");
+    quaternions.emplace_back((QuaternionItem *) retFunc);
+    printIR("call ^RETURN");
+
     for (int i = 0; i < funcIRItem->getParaNum(); i++) {
         auto *popStackQ = new StackPopQ("$0");
         quaternions.emplace_back((QuaternionItem *) popStackQ);
         printIR("pop stack -> $0");
     }
+
+    auto *popStackQ = new StackPopQ("ra");
+    quaternions.emplace_back((QuaternionItem *) popStackQ);
+    printIR("pop stack -> ra");
 //    printIR("pop stack " + std::to_string(funcIRItem->getParaNum() + 1));
 
     if (funcIrItem != nullptr) {
@@ -477,12 +530,14 @@ int FuncUnaryExp::makeIR() {
 }
 
 int FuncRParams::makeIR() {
+    int argNo = 0;
     for (auto iter: this->paramExps) {
         int paraT = iter->makeIR();
 
-        auto *pushStack = new StackPushQ(toTmpVar(paraT));
+        auto *pushStack = new StackPushQ(toTmpVar(paraT), true, argNo);
         quaternions.emplace_back((QuaternionItem *) pushStack);
         printIR("push " + toTmpVar(paraT));
+        argNo++;
     }
 }
 

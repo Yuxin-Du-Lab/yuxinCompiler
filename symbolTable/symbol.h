@@ -8,7 +8,7 @@
 #include "vector"
 #include "../token/Token.h"
 #include "unordered_map"
-#include "../AST/ASTBuilder.h"
+#include "../AST/AST.h"
 #include "../error/errorHandler.h"
 
 #define FUNC_SCOPE "FUNC_SCOPE SCOPE"

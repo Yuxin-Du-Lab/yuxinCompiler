@@ -140,14 +140,25 @@ public:
 
 class FuncIRItem : public IRSymbolItem {
     int paraNum;
-    std::vector<std::string> tmpVars;
+//    std::vector<std::string> tmpVars;
+//    std::unordered_map<std::string, int> varName2stackOffset;
+    std::unordered_map<std::string, int> name2offset4stack;
+    std::unordered_map<std::string, int> name2size4stack;
 public:
     FuncIRItem(std::string identIn, int paraNumIn) : IRSymbolItem(std::move(identIn)) {
         this->paraNum = paraNumIn;
     }
 
     std::vector<std::string> getTmpVars() {
-        return this->tmpVars;
+        std::vector<std::string> res;
+        for (auto iter : this->name2size4stack) {
+            res.emplace_back(iter.first);
+        }
+        return res;
+    }
+
+    std::unordered_map<std::string, int> getStackVars() {
+        return this->name2offset4stack;
     }
 
     int getType() override {
@@ -162,21 +173,33 @@ public:
         return this->paraNum;
     }
 
-    void addTmpVar(std::string tmp) {
-        for (auto iter : this->tmpVars) {
-            if (iter == tmp) {
-                return;
-            }
+    void addTmpVar(std::string tmp, int size_in_word = 1) {
+        this->name2offset4stack.emplace(tmp, this->getStackCurrentSize());
+        this->name2size4stack.emplace(tmp, size_in_word);
+    }
+
+    int getStackCurrentSize() {
+        int res = 0;
+        for (auto iter : this->name2size4stack) {
+            res += iter.second;
         }
-        this->tmpVars.emplace_back(tmp);
+        return res;
     }
 
     void checkTmpVars() {
         std::cout << "checkTmpVars for func : " << this->getName() << std::endl;
-        for (auto iter : this->tmpVars) {
-            std::cout << iter << std::endl;
+        for (auto iter : this->name2offset4stack) {
+            std::cout << iter.first << " : " << iter.second << std::endl;
         }
         std::cout << "check end" << std::endl;
+    }
+
+    std::unordered_map<std::string, int> getName2offset4stack() {
+        return this->name2offset4stack;
+    }
+
+    std::unordered_map<std::string, int> getName2size4stack() {
+        return this->name2size4stack;
     }
 };
 

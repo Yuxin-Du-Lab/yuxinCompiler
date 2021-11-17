@@ -2,7 +2,7 @@
 // Created by yuxin on 2021/10/3.
 //
 
-#include "ASTBuilder.h"
+#include "AST.h"
 
 
 void CompUnit::addConstDecl(ConstDecl *constDecl) {

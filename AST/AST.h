@@ -2,8 +2,8 @@
 // Created by yuxin on 2021/10/3.
 //
 
-#ifndef COMPILER_ASTBUILDER_H
-#define COMPILER_ASTBUILDER_H
+#ifndef COMPILER_AST_H
+#define COMPILER_AST_H
 
 #include <fstream>
 #include "vector"
@@ -1271,4 +1271,4 @@ public:
     void storeGlobalValues();
 };
 
-#endif //COMPILER_ASTBUILDER_H
+#endif //COMPILER_AST_H
