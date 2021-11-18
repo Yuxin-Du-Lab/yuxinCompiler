@@ -232,7 +232,7 @@ void FuncDeclQ::makeMips() {
 void FuncCallQ::makeMips() {
     if (this->name == "^RETURN") {
         printMK("func return " + this->name);
-        printMips("addi\t$sp\t$sp\t" + std::to_string(stacks[stacks.size() - 1]));
+        printMips("addiu\t$sp\t$sp\t" + std::to_string(stacks[stacks.size() - 1]));
         stacks.pop_back();
         return;
     }
@@ -246,8 +246,8 @@ void FuncCallQ::makeMips() {
     stacks.emplace_back(current_func_stack_size);
     size = std::to_string(current_func_stack_size);
     printMK("func call " + this->name);
-//    printMips("sub\t$sp\t$sp\t" + size);
-    printMips("sub\t$t8\t$sp\t" + size);
+//    printMips("subu\t$sp\t$sp\t" + size);
+    printMips("subu\t$t8\t$sp\t" + size);
 //    $t8 hold the new $sp
 }
 
@@ -267,9 +267,9 @@ void ExitQ::makeMips() {
 void StackPushQ::makeMips() {
     if (this->isArg) {
         if (isArgArr(this->rVal)) {
-            printMK("stack push address " + this->rVal);
+            printMK("stack push adduress " + this->rVal);
             int arr_off = name2offset.find(this->rVal)->second * word2bytes;
-            printMips("addi\t$t0\t$sp\t" + std::to_string(arr_off));
+            printMips("addiu\t$t0\t$sp\t" + std::to_string(arr_off));
         } else {
             printMK("stack push value " + this->rVal);
             lwFromStack_var(this->rVal, reg_t0);
@@ -385,20 +385,20 @@ void ArrAssignQ::makeMips() {
         // stack arr
         if (isArgArr(this->name)) {
             lwFromStack_var(this->name, reg_t5);
-//            $t5 = arr address
+//            $t5 = arr adduress
             if (isNum(this->offset)) {
                 int off = atoi(this->offset.c_str()) * word2bytes;
-                printMips("addi\t$t6\t$t5\t" + std::to_string(off));
+                printMips("addiu\t$t6\t$t5\t" + std::to_string(off));
                 printMips("sw\t$t0\t($t6)");
             } else if (isGlobal(this->offset)) {
                 lwFromGlobal_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("add\t$t6\t$t5\t$t2");
+                printMips("addu\t$t6\t$t5\t$t2");
                 printMips("sw\t$t0\t($t6)");
             } else {
                 lwFromStack_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("add\t$t6\t$t5\t$t2");
+                printMips("addu\t$t6\t$t5\t$t2");
                 printMips("sw\t$t0\t($t6)");
             }
             return;
@@ -411,16 +411,16 @@ void ArrAssignQ::makeMips() {
             printMips("li\t$t1\t" + std::to_string(arrOff));
             lwFromGlobal_var(this->offset, reg_t2);
             printMips("sll\t$t2\t$t2\t2");
-            printMips("add\t$t3\t$t1\t$t2");
-            printMips("add\t$t4\t$t3\t$sp");
+            printMips("addu\t$t3\t$t1\t$t2");
+            printMips("addu\t$t4\t$t3\t$sp");
             printMips("sw\t$t0\t($t4)");
         } else {
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t1\t" + std::to_string(arrOff));
             lwFromStack_var(this->offset, reg_t2);
             printMips("sll\t$t2\t$t2\t2");
-            printMips("add\t$t3\t$t1\t$t2");
-            printMips("add\t$t4\t$t3\t$sp");
+            printMips("addu\t$t3\t$t1\t$t2");
+            printMips("addu\t$t4\t$t3\t$sp");
             printMips("sw\t$t0\t($t4)");
         }
     }
@@ -446,20 +446,20 @@ void GetArrQ::makeMips() {
         // stack arr
         if (isArgArr(this->name)) {
             lwFromStack_var(this->name, reg_t5);
-//            $t5 = arr address
+//            $t5 = arr adduress
             if (isNum(this->offset)) {
                 int off = atoi(this->offset.c_str()) * word2bytes;
-                printMips("addi\t$t6\t$t5\t" + std::to_string(off));
+                printMips("addiu\t$t6\t$t5\t" + std::to_string(off));
                 printMips("lw\t$t0\t($t6)");
             } else if (isGlobal(this->offset)) {
                 lwFromGlobal_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("add\t$t6\t$t5\t$t2");
+                printMips("addu\t$t6\t$t5\t$t2");
                 printMips("lw\t$t0\t($t6)");
             } else {
                 lwFromStack_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("add\t$t6\t$t5\t$t2");
+                printMips("addu\t$t6\t$t5\t$t2");
                 printMips("lw\t$t0\t($t6)");
             }
             if (isGlobal(this->lVal)) {
@@ -479,16 +479,16 @@ void GetArrQ::makeMips() {
             printMips("sll\t$t1\t$t1\t2");
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t2\t" + std::to_string(arrOff));
-            printMips("add\t$t3\t$t2\t$t1");
-            printMips("add\t$t4\t$t3\t$sp");
+            printMips("addu\t$t3\t$t2\t$t1");
+            printMips("addu\t$t4\t$t3\t$sp");
             printMips("lw\t$t0\t($t4)");
         } else {
             lwFromStack_var(this->offset, reg_t1);
             printMips("sll\t$t1\t$t1\t2");
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t2\t" + std::to_string(arrOff));
-            printMips("add\t$t3\t$t2\t$t1");
-            printMips("add\t$t4\t$t3\t$sp");
+            printMips("addu\t$t3\t$t2\t$t1");
+            printMips("addu\t$t4\t$t3\t$sp");
             printMips("lw\t$t0\t($t4)");
         }
     }
@@ -505,15 +505,15 @@ void ExpQ::makeMips() {
         printMK(this->res + " = " + this->op + "\t" + this->arg1);
         if (this->op == "-") {
             lwFromStack_var(this->arg1, reg_t0);
-            printMips("sub\t$t1\t$0\t$t0");
+            printMips("subu\t$t1\t$0\t$t0");
             sw2stack_var(this->res, reg_t1);
         } else if (this->op == "!") {
 //            lwFromStack_var(this->arg1, reg_t0);
 //            printMips("slti\t$t1\t$t0\t1");
 //            sw2stack_var(this->res, reg_t1);
             lwFromStack_var(this->arg1, reg_t0);
-            printMips("sub\t$t2\t$t0\t$0");
-            printMips("sub\t$t3\t$0\t$t0");
+            printMips("subu\t$t2\t$t0\t$0");
+            printMips("subu\t$t3\t$0\t$t0");
             printMips("slti\t$t2\t$t2\t1");
             printMips("slti\t$t3\t$t3\t1");
             printMips("and\t$t4\t$t2\t$t3");
@@ -535,7 +535,7 @@ void ExpQ::makeMips() {
             }
             lwFromStack_var(this->arg2, reg_t1);
             printMips("sll\t$t1\t$t1\t2");
-            printMips("add\t$t2\t$t0\t$t1");
+            printMips("addu\t$t2\t$t0\t$t1");
         } else if (isArr(this->arg2)) {
             if (isGlobalArr(this->arg2)) {
                 lwFromGlobal_var(this->arg2, reg_t0);
@@ -544,17 +544,17 @@ void ExpQ::makeMips() {
             }
             lwFromStack_var(this->arg1, reg_t1);
             printMips("sll\t$t1\t$t1\t2");
-            printMips("add\t$t2\t$t1\t$t0");
+            printMips("addu\t$t2\t$t1\t$t0");
         } else {
             lwFromStack_var(this->arg1, reg_t0);
             lwFromStack_var(this->arg2, reg_t1);
-            printMips("add\t$t2\t$t0\t$t1");
+            printMips("addu\t$t2\t$t0\t$t1");
         }
         sw2stack_var(this->res, reg_t2);
     } else if (this->op == "-") {
         lwFromStack_var(this->arg1, reg_t0);
         lwFromStack_var(this->arg2, reg_t1);
-        printMips("sub\t$t2\t$t0\t$t1");
+        printMips("subu\t$t2\t$t0\t$t1");
         sw2stack_var(this->res, reg_t2);
     } else if (this->op == "*") {
         lwFromStack_var(this->arg1, reg_t0);
@@ -587,20 +587,20 @@ void ExpQ::makeMips() {
     } else if (this->op == ">=") {
         lwFromStack_var(this->arg1, reg_t0);
         lwFromStack_var(this->arg2, reg_t1);
-        printMips("sub\t$t2\t$t1\t$t0");
+        printMips("subu\t$t2\t$t1\t$t0");
         printMips("slti\t$t3\t$t2\t1");
         sw2stack_var(this->res, reg_t3);
     } else if (this->op == "<=") {
         lwFromStack_var(this->arg1, reg_t0);
         lwFromStack_var(this->arg2, reg_t1);
-        printMips("sub\t$t2\t$t0\t$t1");
+        printMips("subu\t$t2\t$t0\t$t1");
         printMips("slti\t$t3\t$t2\t1");
         sw2stack_var(this->res, reg_t3);
     } else if (this->op == "==") {
         lwFromStack_var(this->arg1, reg_t0);
         lwFromStack_var(this->arg2, reg_t1);
-        printMips("sub\t$t2\t$t0\t$t1");
-        printMips("sub\t$t3\t$t1\t$t0");
+        printMips("subu\t$t2\t$t0\t$t1");
+        printMips("subu\t$t3\t$t1\t$t0");
         printMips("slti\t$t2\t$t2\t1");
         printMips("slti\t$t3\t$t3\t1");
         printMips("and\t$t4\t$t2\t$t3");
@@ -608,8 +608,8 @@ void ExpQ::makeMips() {
     } else if (this->op == "!=") {
         lwFromStack_var(this->arg1, reg_t0);
         lwFromStack_var(this->arg2, reg_t1);
-        printMips("sub\t$t2\t$t0\t$t1");
-        printMips("sub\t$t3\t$t1\t$t0");
+        printMips("subu\t$t2\t$t0\t$t1");
+        printMips("subu\t$t3\t$t1\t$t0");
         printMips("slti\t$t2\t$t2\t0");
         printMips("slti\t$t3\t$t3\t0");
         printMips("or\t$t4\t$t2\t$t3");
