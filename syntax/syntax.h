@@ -61,7 +61,7 @@ UnaryOp *getUnaryOp(std::vector<Token> &wordList, int *pointer, bool scanning = 
 
 Exp *getExp(std::vector<Token> &wordList, int *pointer, bool scanning = false);
 
-FuncRParams *getFuncRParams(std::vector<Token> &wordList, int *pointer, bool scanning = false);
+FuncRParams *getFuncRParams(std::vector<Token> &wordList, int *pointer,FuncUnaryExp *caller, bool scanning = false);
 
 FuncType *getFuncType(std::vector<Token> &wordList, int *pointer);
 

@@ -353,9 +353,9 @@ Stmt *getStmt(std::vector<Token> &wordList, int *pointer, bool isLoop) {
                     //0 d
                     lVal->setRows();
                 } else if (item->getType() == ARRAY_ITEM_D1) {
-                    lVal->setRows(((ArrayItem*)item)->getRow1());
+                    lVal->setRows(((ArrayItem *) item)->getRow1());
                 } else if (item->getType() == ARRAY_ITEM_D2) {
-                    lVal->setRows(((ArrayItem*)item)->getRow1(), ((ArrayItem*)item)->getRow2());
+                    lVal->setRows(((ArrayItem *) item)->getRow1(), ((ArrayItem *) item)->getRow2());
                 }
             }
             if (wordList[(*pointer)].getIdentity() == ASSIGN) {
@@ -550,8 +550,8 @@ FuncFParam *getFuncFParam(std::vector<Token> &wordList, int *pointer) {
     return funcFParamptr;
 }
 
-FuncRParams *getFuncRParams(std::vector<Token> &wordList, int *pointer, bool scanning) {
-    auto *funcRParamsptr = new FuncRParams();
+FuncRParams *getFuncRParams(std::vector<Token> &wordList, int *pointer, FuncUnaryExp *caller, bool scanning) {
+    auto *funcRParamsptr = new FuncRParams(caller);
     auto *exp = getExp(wordList, pointer, scanning);
     funcRParamsptr->addParamsExp(exp);
     while (wordList[*pointer].getIdentity() == COMMA) {
@@ -585,7 +585,7 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
                 writeFile4syntax(wordList[(*pointer)], scanning);
                 (*pointer)++;   // for (
                 if (wordList[*pointer].getIdentity() != RPARENT) {
-                    auto *funcRParams = getFuncRParams(wordList, pointer, scanning);
+                    auto *funcRParams = getFuncRParams(wordList, pointer, (FuncUnaryExp *) unaryExpptr, scanning);
                     ((FuncUnaryExp *) unaryExpptr)->setFuncRParams(funcRParams);
                 }
                 if (symbolTable.exist(key)) {
@@ -602,7 +602,8 @@ UnaryExp *getUnaryExp(std::vector<Token> &wordList, int *pointer, bool scanning)
                     }
 //                  TODO params F & R type match
                     if (((FuncUnaryExp *) unaryExpptr)->getFuncRParams() != nullptr) {
-                        funcItem->typeMatch(((FuncUnaryExp *) unaryExpptr)->getFuncRParams()->getRParams(), ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
+                        funcItem->typeMatch(((FuncUnaryExp *) unaryExpptr)->getFuncRParams()->getRParams(),
+                                            ((FuncUnaryExp *) unaryExpptr)->getIdent()->getLine());
                     }
 
                 }
@@ -683,24 +684,24 @@ PrimaryExp *getPrimaryExp(std::vector<Token> &wordList, int *pointer, bool scann
                 //0 d
                 lVal->setRows();
             } else if (item->getType() == ARRAY_ITEM_D1) {
-                lVal->setRows(((ArrayItem*)item)->getRow1());
+                lVal->setRows(((ArrayItem *) item)->getRow1());
             } else if (item->getType() == ARRAY_ITEM_D2) {
-                lVal->setRows(((ArrayItem*)item)->getRow1(), ((ArrayItem*)item)->getRow2());
+                lVal->setRows(((ArrayItem *) item)->getRow1(), ((ArrayItem *) item)->getRow2());
             }
         }
         if (gettingConstExp) {
-            Item* item = symbolTable.findItem(lVal->getIdent()->getKey());
+            Item *item = symbolTable.findItem(lVal->getIdent()->getKey());
             if (lVal->getDimension() == 0) {
-                lVal->setConstValue(((VarItem *)item)->getConstValue());
+                lVal->setConstValue(((VarItem *) item)->getConstValue());
             } else {
-                ConstInitVal *constInitVal = ((ArrayItem *)item)->getConstDef()->getConstInitVal();
+                ConstInitVal *constInitVal = ((ArrayItem *) item)->getConstDef()->getConstInitVal();
                 if (lVal->getDimension() == 1) {
-                    int row1 = ((ConstExp *)lVal->getExp(0))->getConstValue();
-                    lVal->setConstValue(((ArrayItem*)item)->getConstValue(row1));
+                    int row1 = ((ConstExp *) lVal->getExp(0))->getConstValue();
+                    lVal->setConstValue(((ArrayItem *) item)->getConstValue(row1));
                 } else if (lVal->getDimension() == 2) {
-                    int row1 = ((ConstExp *)lVal->getExp(0))->getConstValue();
-                    int row2 = ((ConstExp *)lVal->getExp(1))->getConstValue();
-                    lVal->setConstValue(((ArrayItem*)item)->getConstValue(row1, row2));
+                    int row1 = ((ConstExp *) lVal->getExp(0))->getConstValue();
+                    int row2 = ((ConstExp *) lVal->getExp(1))->getConstValue();
+                    lVal->setConstValue(((ArrayItem *) item)->getConstValue(row1, row2));
                 }
             }
         }
@@ -1267,8 +1268,8 @@ Exp *getExp(std::vector<Token> &wordList, int *pointer, bool scanning) {
 int FuncUnaryExp::getRealDimension() {
     auto *funcItem = symbolTable.findItem(this->ident->getKey());
     if (funcItem != nullptr) {
-        auto *funcDef = (FuncDef *)funcItem->getAstItem();
-        if (funcDef!= nullptr) {
+        auto *funcDef = (FuncDef *) funcItem->getAstItem();
+        if (funcDef != nullptr) {
             return funcDef->getFuncType()->isVoid() ? -1 : 0;
         }
     }

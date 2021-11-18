@@ -60,7 +60,7 @@ int CompUnit::makeIR() {
     quaternions.emplace_back((QuaternionItem *) callMain);
     printIR("call main");
 
-    auto *jump2mainQ = new BranchQ(JUMP, toLabel(mainLabel));
+    auto *jump2mainQ = new BranchQ(JUMP, toLabel(mainLabel), true);
     quaternions.emplace_back((QuaternionItem *) jump2mainQ);
     printIR(JUMP + toLabel(mainLabel));
 
@@ -96,7 +96,7 @@ int CompUnit::makeIR() {
     quaternions.emplace_back((QuaternionItem *) exitQ);
 
     table->exitScope();
-    table->check();
+//    table->check();
     for (auto IRIter: quaternions) {
         IRIter->makeIR();
     }
@@ -479,19 +479,27 @@ int FuncUnaryExp::makeIR() {
     quaternions.emplace_back((QuaternionItem *) pushStack);
     printIR("push ra");
 
-    auto *callFunc = new FuncCallQ(this->ident->getKey());
-    quaternions.emplace_back((QuaternionItem *) callFunc);
-    printIR("call " + this->ident->getKey());
 
     if (this->funcRParams != nullptr) {
         this->funcRParams->makeIR();
+    } else {
+        auto *callFunc = new FuncCallQ(this->ident->getKey());
+        quaternions.emplace_back((QuaternionItem *) callFunc);
+        printIR("call " + this->ident->getKey());
     }
 
     if (func2label.find(this->ident->getKey()) != func2label.end()) {
-        auto *jump = new BranchQ(JUMP_AND_LINK, toLabel(func2label.find(this->ident->getKey())->second));
+        auto *jump = new BranchQ(JUMP_AND_LINK,
+                                 toLabel(func2label.find(this->ident->getKey())->second),
+                                 true);
         quaternions.emplace_back((QuaternionItem *) jump);
         printIR(JUMP_AND_LINK + " " + toLabel(func2label.find(this->ident->getKey())->second));
     }
+
+    auto *retFunc = new FuncCallQ("^RETURN");
+    quaternions.emplace_back((QuaternionItem *) retFunc);
+    printIR("call ^RETURN");
+
     int ret = tmpVar++;
     auto *getRet = new GetRetQ(toTmpVar(ret));
     quaternions.emplace_back((QuaternionItem *) getRet);
@@ -502,10 +510,6 @@ int FuncUnaryExp::makeIR() {
 //    printIR("load ra from stackTop");
 
     auto *funcIRItem = (FuncIRItem *) table->findItemFromTable(this->ident->getKey());
-
-    auto *retFunc = new FuncCallQ("^RETURN");
-    quaternions.emplace_back((QuaternionItem *) retFunc);
-    printIR("call ^RETURN");
 
     for (int i = 0; i < funcIRItem->getParaNum(); i++) {
         auto *popStackQ = new StackPopQ("$0");
@@ -531,13 +535,28 @@ int FuncUnaryExp::makeIR() {
 
 int FuncRParams::makeIR() {
     int argNo = 0;
+    std::vector<QuaternionItem *> args;
+    std::vector<int> paraTs;
     for (auto iter: this->paramExps) {
         int paraT = iter->makeIR();
 
         auto *pushStack = new StackPushQ(toTmpVar(paraT), true, argNo);
-        quaternions.emplace_back((QuaternionItem *) pushStack);
-        printIR("push " + toTmpVar(paraT));
+        args.emplace_back((QuaternionItem *) pushStack);
+        paraTs.emplace_back(paraT);
+//        quaternions.emplace_back((QuaternionItem *) pushStack);
+//        printIR("push " + toTmpVar(paraT));
         argNo++;
+    }
+//    should call here!
+    auto *callFunc = new FuncCallQ(this->getCaller()->getIdent()->getKey());
+    quaternions.emplace_back((QuaternionItem *) callFunc);
+    printIR("call " + this->getCaller()->getIdent()->getKey());
+
+    int scan = 0;
+    for (auto iter : args) {
+        quaternions.emplace_back((QuaternionItem *) iter);
+        printIR("push " + toTmpVar(paraTs[scan]));
+        scan ++;
     }
 }
 

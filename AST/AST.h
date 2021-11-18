@@ -902,7 +902,7 @@ public:
 
     void print(int tab) override;
 
-    int makeIR(bool isFuncBlock= false);
+    int makeIR(bool isFuncBlock = false);
 
     int getType() override {
         return BlockType;
@@ -1173,7 +1173,16 @@ public:
 //TODO
 class FuncRParams : public AstItem {
     std::vector<Exp *> paramExps;
+    FuncUnaryExp *caller{};
 public:
+    FuncRParams(FuncUnaryExp *callerIn) {
+        this->caller = callerIn;
+    }
+
+    FuncUnaryExp *getCaller() {
+        return this->caller;
+    }
+
     void addParamsExp(Exp *exp);
 
     void print(int tab) override;

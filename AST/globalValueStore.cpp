@@ -5,6 +5,7 @@
 #include "unordered_map"
 #include "vector"
 #include "../IR/IRScope.h"
+#define standard_header "#0"
 
 extern IRSymbolTable *table;
 
@@ -13,7 +14,7 @@ std::unordered_map<std::string, std::vector<int>> globalArr2value;
 std::unordered_map<std::string, int> globalUndefinedVar;
 std::unordered_map<std::string, int> globalUndefinedArr;
 
-const std::string standard_header = "#0";
+//const std::string standard_header = "#0";
 
 void CompUnit::storeGlobalValues() {
     for (auto constItem: this->constDecls) {

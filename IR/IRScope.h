@@ -50,7 +50,6 @@ public:
 };
 
 class VarIRItem : public IRSymbolItem {
-    int address;
 public:
     VarIRItem(std::string identIn) : IRSymbolItem(std::move(identIn)) {
 
@@ -88,7 +87,6 @@ public:
 class ArrIRItem : public IRSymbolItem {
     int row;
     int row_2;
-    int address;
 public:
     ArrIRItem(std::string identIn, int rowIn, int row_2In=-1) : IRSymbolItem(std::move(identIn)) {
         this->row = rowIn;

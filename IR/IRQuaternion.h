@@ -58,7 +58,13 @@ public:
         this->isGlobal = isGlobal;
     }
 
+    std::string toString() {
+        return this->name + "#" + std::to_string(this->scopeId);
+    }
+
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class VarDeclQ : public QuaternionItem {
@@ -101,7 +107,13 @@ public:
         this->isGlobal = isGlobal;
     }
 
+    std::string toString() {
+        return this->name + "#" + std::to_string(this->scopeId);
+    }
+
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class FuncDeclQ : public QuaternionItem {
@@ -152,6 +164,8 @@ public:
     }
 
     void makeIR() override;
+
+    void makeMips() override;
 };
 
 class ExpQ : public QuaternionItem {
@@ -308,10 +322,12 @@ class BranchQ : QuaternionItem {
     std::string arg1;
     std::string arg2;
     std::string label;
+    bool isFuncCall;
 public:
-    BranchQ(std::string op, std::string label) {
+    BranchQ(std::string op, std::string label, bool isFuncCall = false) {
         this->op = std::move(op);
         this->label = std::move(label);
+        this->isFuncCall = isFuncCall;
     }
 
     BranchQ(std::string op, std::string arg1, std::string arg2, std::string label) {
@@ -319,11 +335,16 @@ public:
         this->label = std::move(label);
         this->arg1 = std::move(arg1);
         this->arg2 = std::move(arg2);
+        this->isFuncCall = false;
     }
 
     void makeIR() override;
 
     void makeMips() override;
+
+    bool getIsFuncCall() {
+        return this->isFuncCall;
+    }
 };
 
 class CallGetIntQ : public QuaternionItem {
