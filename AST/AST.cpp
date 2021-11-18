@@ -402,4 +402,5 @@ int ConstInitVal::getSpecificValue(int row1, int row2)  {
             return this->values[row1 * this->constDef->getConstExp(1)->getConstValue() + row2];
         }
     }
+    return VALUE_ERROR;
 }

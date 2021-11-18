@@ -3,6 +3,11 @@
 #include "syntax/syntax.h"
 #include "mips/mips.h"
 
+#define printLexerRes true
+#define printSyntaxRex true
+#define printASTRes false
+#define printIR_MipsRes true
+
 void writeFile4WordList(std::vector<Token> wordList) {
     std::ofstream writeLexerFile("LexerRes.txt");
     auto scan = wordList.begin();
@@ -14,10 +19,6 @@ void writeFile4WordList(std::vector<Token> wordList) {
 
 // main
 int main() {
-    const bool printLexerRes = true;
-    const bool printSyntaxRex = true;
-    const bool printASTRes = true;
-    const bool printIR_MipsRes = true;
     std::ifstream readLexerFile("testfile.txt");
     std::vector<Token> wordList = worldsAnalyse(readLexerFile);
     if (printLexerRes) writeFile4WordList(wordList);

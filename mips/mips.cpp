@@ -500,6 +500,7 @@ void GetArrQ::makeMips() {
 }
 
 void ExpQ::makeMips() {
+    if (stacks.empty()) return;
     if (this->opRel == 1) {
         printMK(this->res + " = " + this->op + "\t" + this->arg1);
         if (this->op == "-") {
@@ -507,9 +508,16 @@ void ExpQ::makeMips() {
             printMips("sub\t$t1\t$0\t$t0");
             sw2stack_var(this->res, reg_t1);
         } else if (this->op == "!") {
+//            lwFromStack_var(this->arg1, reg_t0);
+//            printMips("slti\t$t1\t$t0\t1");
+//            sw2stack_var(this->res, reg_t1);
             lwFromStack_var(this->arg1, reg_t0);
-            printMips("slti\t$t1\t$t0\t1");
-            sw2stack_var(this->res, reg_t1);
+            printMips("sub\t$t2\t$t0\t$0");
+            printMips("sub\t$t3\t$0\t$t0");
+            printMips("slti\t$t2\t$t2\t1");
+            printMips("slti\t$t3\t$t3\t1");
+            printMips("and\t$t4\t$t2\t$t3");
+            sw2stack_var(this->res, reg_t4);
         } else {
             lwFromStack_var(this->arg1, reg_t0);
             sw2stack_var(this->res, reg_t0);
@@ -519,15 +527,27 @@ void ExpQ::makeMips() {
     printMK(this->res + " = " + this->arg1 + "\t" + this->op + "\t" + this->arg2);
 //    TODO global arr offset increase, but stack arr offset decrease, arg arr ?
     if (this->op == "+") {
-        lwFromStack_var(this->arg1, reg_t0);
-        lwFromStack_var(this->arg2, reg_t1);
         if (isArr(this->arg1)) {
+            if (isGlobalArr(this->arg1)) {
+                lwFromGlobal_var(this->arg1, reg_t0);
+            } else {
+                lwFromStack_var(this->arg1, reg_t0);
+            }
+            lwFromStack_var(this->arg2, reg_t1);
             printMips("sll\t$t1\t$t1\t2");
             printMips("add\t$t2\t$t0\t$t1");
         } else if (isArr(this->arg2)) {
-            printMips("sll\t$t0\t$t0\t2");
+            if (isGlobalArr(this->arg2)) {
+                lwFromGlobal_var(this->arg2, reg_t0);
+            } else {
+                lwFromStack_var(this->arg2, reg_t0);
+            }
+            lwFromStack_var(this->arg1, reg_t1);
+            printMips("sll\t$t1\t$t1\t2");
             printMips("add\t$t2\t$t1\t$t0");
         } else {
+            lwFromStack_var(this->arg1, reg_t0);
+            lwFromStack_var(this->arg2, reg_t1);
             printMips("add\t$t2\t$t0\t$t1");
         }
         sw2stack_var(this->res, reg_t2);

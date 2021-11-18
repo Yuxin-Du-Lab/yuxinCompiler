@@ -100,6 +100,7 @@ int CompUnit::makeIR() {
     for (auto IRIter: quaternions) {
         IRIter->makeIR();
     }
+    return VALUE_ERROR;
 }
 
 /*
@@ -109,6 +110,7 @@ int ConstDecl::makeIR() {
     for (auto iter: this->constDefs) {
         iter->makeIR();
     }
+    return VALUE_ERROR;
 }
 
 int ConstDef::makeIR() {
@@ -168,6 +170,7 @@ int ConstDef::makeIR() {
                 "[" + std::to_string(this->getConstExp(1)->getConstValue()) + "]");
         this->constInitVal->makeIR(0, true, this->ident);
     }
+    return VALUE_ERROR;
 }
 
 int ConstInitVal::makeIR(int index, bool isArr, Token *ident) {
@@ -276,6 +279,7 @@ int VarDecl::makeIR() {
     for (auto iter: this->varDefs) {
         iter->makeIR();
     }
+    return VALUE_ERROR;
 }
 
 int VarDef::makeIR() {
@@ -344,6 +348,7 @@ int VarDef::makeIR() {
             }
         }
     }
+    return VALUE_ERROR;
 }
 
 int InitVal::makeIR(int index, bool isArr, Token *ident) {
@@ -433,12 +438,14 @@ int FuncDef::makeIR() {
     table->getCurrentFunc()->checkTmpVars();
     table->setCurrentFunc(nullptr);
     table->exitScope();
+    return VALUE_ERROR;
 }
 
 int FuncFParams::makeIR() {
     for (auto iter: this->funcFParams) {
         iter->makeIR();
     }
+    return VALUE_ERROR;
 }
 
 int FuncFParam::makeIR() {
@@ -461,6 +468,7 @@ int FuncFParam::makeIR() {
     auto *paraDeclQ = new ParaDeclQ(this->ident->getKey(), table->getCurrentScopeId(), this->row);
     quaternions.emplace_back((QuaternionItem *) paraDeclQ);
     table->getCurrentFunc()->addTmpVar(paraDeclQ->toString());
+    return VALUE_ERROR;
 }
 
 int FuncUnaryExp::makeIR() {
@@ -558,6 +566,7 @@ int FuncRParams::makeIR() {
         printIR("push " + toTmpVar(paraTs[scan]));
         scan ++;
     }
+    return VALUE_ERROR;
 }
 
 /*
@@ -574,6 +583,7 @@ int Block::makeIR(bool isFuncBlock) {
     if (!isFuncBlock) {
         table->exitScope();
     }
+    return VALUE_ERROR;
 }
 
 int Stmt::makeIR() { return VALUE_ERROR; }
@@ -622,16 +632,19 @@ int LValStmt::makeIR() {
         quaternions.emplace_back((QuaternionItem *) arrAssign);
         printIR(this->lVal->getIdent()->getKey() + "[" + toTmpVar(indexT) + "]" + " = " + toTmpVar(expT));
     }
+    return VALUE_ERROR;
 }
 
 int ExpStmt::makeIR() {
     if (this->exp != nullptr) {
         return this->exp->makeIR();
     }
+    return VALUE_ERROR;
 }
 
 int BlockStmt::makeIR() {
     this->block->makeIR();
+    return VALUE_ERROR;
 }
 
 int IfStmt::makeIR() {
@@ -661,6 +674,7 @@ int IfStmt::makeIR() {
     auto *setLabel2 = new SetLabelQ(toLabel(end_label));
     quaternions.emplace_back((QuaternionItem *) setLabel2);
     printIR(toLabel(end_label, true));
+    return VALUE_ERROR;
 }
 
 int WhileStmt::makeIR() {
@@ -693,6 +707,7 @@ int WhileStmt::makeIR() {
 
     while_heads.pop_back();
     while_ends.pop_back();
+    return VALUE_ERROR;
 }
 
 int LoopStmt::makeIR() {
@@ -705,6 +720,7 @@ int LoopStmt::makeIR() {
         quaternions.emplace_back((QuaternionItem *) jumpQ);
         printIR(JUMP + " " + toLabel(while_ends[while_ends.size() - 1]));
     }
+    return VALUE_ERROR;
 }
 
 int ReturnStmt::makeIR() {
@@ -724,6 +740,7 @@ int ReturnStmt::makeIR() {
         quaternions.emplace_back((QuaternionItem *) exit);
         printIR("exit");
     }
+    return VALUE_ERROR;
 }
 
 int GetintStmt::makeIR() {
@@ -770,6 +787,7 @@ int GetintStmt::makeIR() {
         quaternions.emplace_back((QuaternionItem *) arrAssign);
         printIR(this->lVal->getIdent()->getKey() + "[" + toTmpVar(indexT) + "]" + " = " + "^GETINT_RET");
     }
+    return VALUE_ERROR;
 }
 
 int PrintfStmt::makeIR() {
@@ -808,6 +826,7 @@ int PrintfStmt::makeIR() {
         formatStrings.emplace_back(buf);
         formatCnt++;
     }
+    return VALUE_ERROR;
 }
 
 // cond
@@ -832,6 +851,7 @@ int LOrExp::makeIR(int if_label, int else_label, int end_label) {
     auto *jumpQ = new BranchQ(JUMP, toLabel(else_label));
     quaternions.emplace_back((QuaternionItem *) jumpQ);
     printIR(JUMP + " " + toLabel(else_label));
+    return VALUE_ERROR;
 }
 
 int LAndExp::makeIR(int and_part_end) {
@@ -844,6 +864,7 @@ int LAndExp::makeIR(int and_part_end) {
                 toTmpVar(eqResT) + " " +
                 "$0" + " " + toLabel(and_part_end));
     }
+    return VALUE_ERROR;
 }
 
 int EqExp::makeIR() {
@@ -1005,4 +1026,5 @@ int LVal::makeIR() {
         printIR(toTmpVar(lValT) + " = " + std::to_string(this->getConstValue()));
         return lValT;
     }
+    return VALUE_ERROR;
 }

@@ -23,15 +23,15 @@ void CompUnit::storeGlobalValues() {
     for (auto varItem: this->varDecls) {
         varItem->storeGlobalValues();
     }
-    for (auto scan: globalVar2value) {
-        std::cout << "Global Var " << scan.first << "\t" << std::to_string(scan.second) << std::endl;
-    }
-    for (auto scan: globalArr2value) {
-        std::cout << "Global Arr " << scan.first << std::endl;
-        for (auto iter: scan.second) {
-            std::cout << std::to_string(iter) << std::endl;
-        }
-    }
+//    for (auto scan: globalVar2value) {
+//        std::cout << "Global Var " << scan.first << "\t" << std::to_string(scan.second) << std::endl;
+//    }
+//    for (auto scan: globalArr2value) {
+//        std::cout << "Global Arr " << scan.first << std::endl;
+//        for (auto iter: scan.second) {
+//            std::cout << std::to_string(iter) << std::endl;
+//        }
+//    }
 }
 
 void ConstDecl::storeGlobalValues() {
