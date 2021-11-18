@@ -388,30 +388,30 @@ void ArrAssignQ::makeMips() {
 //            $t5 = arr address
             if (isNum(this->offset)) {
                 int off = atoi(this->offset.c_str()) * word2bytes;
-                printMips("subi\t$t6\t$t5\t" + std::to_string(off));
+                printMips("addi\t$t6\t$t5\t" + std::to_string(off));
                 printMips("sw\t$t0\t($t6)");
             } else if (isGlobal(this->offset)) {
                 lwFromGlobal_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("sub\t$t6\t$t5\t$t2");
+                printMips("add\t$t6\t$t5\t$t2");
                 printMips("sw\t$t0\t($t6)");
             } else {
                 lwFromStack_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("sub\t$t6\t$t5\t$t2");
+                printMips("add\t$t6\t$t5\t$t2");
                 printMips("sw\t$t0\t($t6)");
             }
             return;
         }
         if (isNum(this->offset)) {
-            int off = (name2offset.find(this->name)->second - atoi(this->offset.c_str())) * word2bytes;
+            int off = (name2offset.find(this->name)->second + atoi(this->offset.c_str())) * word2bytes;
             printMips("sw\t$t0\t" + std::to_string(off) + "($sp)");
         } else if (isGlobal(this->offset)) {
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t1\t" + std::to_string(arrOff));
             lwFromGlobal_var(this->offset, reg_t2);
             printMips("sll\t$t2\t$t2\t2");
-            printMips("sub\t$t3\t$t1\t$t2");
+            printMips("add\t$t3\t$t1\t$t2");
             printMips("add\t$t4\t$t3\t$sp");
             printMips("sw\t$t0\t($t4)");
         } else {
@@ -419,7 +419,7 @@ void ArrAssignQ::makeMips() {
             printMips("li\t$t1\t" + std::to_string(arrOff));
             lwFromStack_var(this->offset, reg_t2);
             printMips("sll\t$t2\t$t2\t2");
-            printMips("sub\t$t3\t$t1\t$t2");
+            printMips("add\t$t3\t$t1\t$t2");
             printMips("add\t$t4\t$t3\t$sp");
             printMips("sw\t$t0\t($t4)");
         }
@@ -449,17 +449,17 @@ void GetArrQ::makeMips() {
 //            $t5 = arr address
             if (isNum(this->offset)) {
                 int off = atoi(this->offset.c_str()) * word2bytes;
-                printMips("subi\t$t6\t$t5\t" + std::to_string(off));
+                printMips("addi\t$t6\t$t5\t" + std::to_string(off));
                 printMips("lw\t$t0\t($t6)");
             } else if (isGlobal(this->offset)) {
                 lwFromGlobal_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("sub\t$t6\t$t5\t$t2");
+                printMips("add\t$t6\t$t5\t$t2");
                 printMips("lw\t$t0\t($t6)");
             } else {
                 lwFromStack_var(this->offset, reg_t2);
                 printMips("sll\t$t2\t$t2\t2");
-                printMips("sub\t$t6\t$t5\t$t2");
+                printMips("add\t$t6\t$t5\t$t2");
                 printMips("lw\t$t0\t($t6)");
             }
             if (isGlobal(this->lVal)) {
@@ -472,14 +472,14 @@ void GetArrQ::makeMips() {
         if (isNum(this->offset)) {
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             int indexOff = atoi(this->offset.c_str()) * word2bytes;
-            int off = arrOff - indexOff;
+            int off = arrOff + indexOff;
             printMips("lw\t$t0\t" + std::to_string(off) + "($sp)");
         } else if (isGlobal(this->offset)) {
             lwFromGlobal_var(this->offset, reg_t1);
             printMips("sll\t$t1\t$t1\t2");
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t2\t" + std::to_string(arrOff));
-            printMips("sub\t$t3\t$t2\t$t1");
+            printMips("add\t$t3\t$t2\t$t1");
             printMips("add\t$t4\t$t3\t$sp");
             printMips("lw\t$t0\t($t4)");
         } else {
@@ -487,7 +487,7 @@ void GetArrQ::makeMips() {
             printMips("sll\t$t1\t$t1\t2");
             int arrOff = name2offset.find(this->name)->second * word2bytes;
             printMips("li\t$t2\t" + std::to_string(arrOff));
-            printMips("sub\t$t3\t$t2\t$t1");
+            printMips("add\t$t3\t$t2\t$t1");
             printMips("add\t$t4\t$t3\t$sp");
             printMips("lw\t$t0\t($t4)");
         }
@@ -523,10 +523,10 @@ void ExpQ::makeMips() {
         lwFromStack_var(this->arg2, reg_t1);
         if (isArr(this->arg1)) {
             printMips("sll\t$t1\t$t1\t2");
-            printMips("sub\t$t2\t$t0\t$t1");
+            printMips("add\t$t2\t$t0\t$t1");
         } else if (isArr(this->arg2)) {
             printMips("sll\t$t0\t$t0\t2");
-            printMips("sub\t$t2\t$t1\t$t0");
+            printMips("add\t$t2\t$t1\t$t0");
         } else {
             printMips("add\t$t2\t$t0\t$t1");
         }

@@ -172,7 +172,7 @@ public:
     }
 
     void addTmpVar(std::string tmp, int size_in_word = 1) {
-        this->name2offset4stack.emplace(tmp, this->getStackCurrentSize());
+        this->name2offset4stack.emplace(tmp, this->getStackCurrentSize() + size_in_word - 1);
         this->name2size4stack.emplace(tmp, size_in_word);
     }
 
